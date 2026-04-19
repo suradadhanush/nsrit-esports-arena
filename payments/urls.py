@@ -10,4 +10,5 @@ urlpatterns = [
     path('failure/', views.payment_failure, name='failure'),
     path('webhook/', views.razorpay_webhook, name='webhook'),
     path('history/', views.payment_history, name='history'),
+    path('upi/<slug:slug>/', views.upi_submit, name='upi_submit'),
 ]

@@ -97,6 +97,7 @@ def initiate_payment(request, slug):
         'user_name': request.user.get_full_name(),
         'user_email': request.user.email,
         'user_phone': request.user.phone or '',
+        'upi_id': settings.UPI_ID,
     }
     return render(request, 'payments/payment_page.html', context)
 
@@ -241,3 +242,49 @@ def payment_history(request):
 
     payments = Payment.objects.filter(player=player).select_related('tournament').order_by('-created_at')
     return render(request, 'payments/history.html', {'payments': payments})
+
+
+@login_required
+def upi_submit(request, slug):
+    """Handle UPI payment submission — stores transaction ID, marks PENDING for admin verification."""
+    if request.method != 'POST':
+        return redirect('tournaments:detail', slug=slug)
+
+    tournament = get_object_or_404(Tournament, slug=slug, is_active=True)
+
+    try:
+        player = request.user.player_profile
+    except Player.DoesNotExist:
+        messages.error(request, 'Create your player profile first!')
+        return redirect('players:create_profile')
+
+    transaction_id = request.POST.get('transaction_id', '').strip()
+    upi_app = request.POST.get('upi_app', 'Other')
+
+    if not transaction_id:
+        messages.error(request, 'Please enter your Transaction ID / UTR number.')
+        return redirect('payments:initiate', slug=slug)
+
+    if Registration.objects.filter(player=player, tournament=tournament).exists():
+        messages.warning(request, '⚠️ You already have a registration for this tournament.')
+        return redirect('tournaments:detail', slug=slug)
+
+    try:
+        Registration.objects.create(
+            player=player,
+            tournament=tournament,
+            status='PENDING',
+            payment_method='UPI',
+            payment_status='PENDING',
+            transaction_id=transaction_id,
+        )
+    except Exception as e:
+        messages.error(request, f'Submission failed: {str(e)}')
+        return redirect('payments:initiate', slug=slug)
+
+    messages.success(
+        request,
+        f'✅ Payment details submitted! Registration for {tournament.title} is pending admin verification. '
+        f'Transaction ID: {transaction_id} ({upi_app}).'
+    )
+    return redirect('tournaments:detail', slug=slug)
