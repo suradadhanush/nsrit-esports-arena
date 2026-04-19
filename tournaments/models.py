@@ -77,6 +77,10 @@ class Tournament(models.Model):
         db_table = 'tournaments'
         ordering = ['-created_at']
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('tournaments:detail', kwargs={'slug': self.slug})
+    
     def __str__(self):
         return f"{self.title} ({self.game})"
 
