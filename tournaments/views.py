@@ -151,7 +151,15 @@ def register_tournament(request, slug):
                     status='CONFIRMED',
                     payment_status='SUCCESS'
                 )
-            messages.success(request, f'✅ Registered for {tournament.title}!')
+            if tournament.mode in ['SQUAD', 'TEAM5', 'DUO']:
+                mode_label = {'SQUAD': 'squad of 4', 'TEAM5': 'team of 5', 'DUO': 'duo'}.get(tournament.mode, 'team')
+                messages.success(request,
+                    f'✅ Registered for {tournament.title}! '
+                    f'This is a {mode_label} tournament — go to Teams section to create your {mode_label} and invite your teammates. '
+                    f'Share the tournament details with them so they can register too.'
+                )
+            else:
+                messages.success(request, f'✅ Registered for {tournament.title}! Good luck!')
         except IntegrityError:
             messages.error(request, '⚠️ Registration failed.')
 

@@ -5,7 +5,10 @@
 {% block content %}
 <section class="page-header">
     <div class="container">
-        <h1 class="page-title"><i class="bi bi-credit-card-fill text-red me-2"></i>Secure <span class="text-cyan">Payment</span></h1>
+        <h1 class="page-title">
+            <i class="bi bi-credit-card-fill text-red me-2"></i>
+            Secure <span class="text-cyan">Payment</span>
+        </h1>
     </div>
 </section>
 
@@ -13,7 +16,9 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-5">
-                <div class="payment-card">
+
+                <!-- Order Summary -->
+                <div class="payment-card mb-4">
                     <div class="payment-header">
                         <div class="text-secondary small mb-1">Entry Fee for</div>
                         <h5 class="rajdhani text-white mb-1">{{ tournament.title }}</h5>
@@ -22,56 +27,126 @@
                             <span class="tag-mode">{{ tournament.get_mode_display }}</span>
                         </div>
                         <div class="payment-amount">₹{{ amount_inr }}</div>
-                        <div class="text-secondary small">Secured by Razorpay</div>
                     </div>
-
-                    <div class="p-4">
-                        <!-- Player Info -->
-                        <div class="arena-form-card mb-3 p-3">
-                            <div class="hud-title mb-2"><i class="bi bi-person-fill"></i>Player Details</div>
-                            <div class="row g-2 text-secondary small">
-                                <div class="col-6">
-                                    <div>IGN</div>
-                                    <div class="text-white fw-bold">{{ player.ign }}</div>
-                                </div>
-                                <div class="col-6">
-                                    <div>Roll Number</div>
-                                    <div class="text-white fw-bold">{{ request.user.roll_number }}</div>
-                                </div>
-                                <div class="col-6">
-                                    <div>Name</div>
-                                    <div class="text-white fw-bold">{{ user_name }}</div>
-                                </div>
-                                <div class="col-6">
-                                    <div>Game</div>
-                                    <div class="text-white fw-bold">{{ tournament.game }}</div>
-                                </div>
+                    <div class="p-3">
+                        <div class="row g-2 text-secondary small">
+                            <div class="col-6">
+                                <div>IGN</div>
+                                <div class="text-white fw-bold">{{ player.ign }}</div>
+                            </div>
+                            <div class="col-6">
+                                <div>Name</div>
+                                <div class="text-white fw-bold">{{ user_name }}</div>
                             </div>
                         </div>
-
-                        <!-- Razorpay Payment Button -->
-                        <form id="payment-form" method="POST" action="{% url 'payments:success' %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
-                            <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
-                            <input type="hidden" name="razorpay_signature" id="razorpay_signature">
-                        </form>
-
-                        <button id="razorpay-btn" class="btn btn-arena-primary w-100 py-3" onclick="openRazorpay()">
-                            <i class="bi bi-lock-fill me-2"></i>
-                            Pay ₹{{ amount_inr }} Securely
-                        </button>
-
-                        <a href="{{ tournament.get_absolute_url }}" class="btn btn-arena-ghost w-100 mt-2">
-                            <i class="bi bi-arrow-left me-2"></i>Cancel
-                        </a>
-
-                        <p class="text-secondary text-center mt-3" style="font-size:0.75rem;">
-                            <i class="bi bi-shield-check me-1"></i>
-                            Your payment is 100% secure. Powered by Razorpay.
-                        </p>
                     </div>
                 </div>
+
+                <!-- Payment Method Selection -->
+                <div class="arena-form-card" id="method-selector">
+                    <h5 class="rajdhani text-center mb-1">
+                        <i class="bi bi-wallet2 text-cyan me-2"></i>Choose Payment Method
+                    </h5>
+                    <p class="text-secondary text-center small mb-4">Select how you want to pay ₹{{ amount_inr }}</p>
+
+                    <button onclick="showUPI()" class="btn btn-arena-primary w-100 py-3 mb-3 d-flex align-items-center justify-content-center gap-3">
+                        <span style="font-size:1.5rem;">📱</span>
+                        <div class="text-start">
+                            <div class="fw-bold">Pay via UPI</div>
+                            <div style="font-size:0.75rem;opacity:0.8;">GPay · PhonePe · Paytm · Any UPI app</div>
+                        </div>
+                        <span class="badge bg-success ms-auto">Recommended</span>
+                    </button>
+
+                    <button onclick="showRazorpay()" class="btn btn-arena-ghost w-100 py-3 mb-3 d-flex align-items-center justify-content-center gap-3">
+                        <span style="font-size:1.5rem;">💳</span>
+                        <div class="text-start">
+                            <div class="fw-bold">Pay via Razorpay</div>
+                            <div style="font-size:0.75rem;opacity:0.8;">Card · Net Banking · Wallet</div>
+                        </div>
+                    </button>
+
+                    <a href="{{ tournament.get_absolute_url }}" class="btn btn-arena-ghost w-100 mt-1">
+                        <i class="bi bi-arrow-left me-2"></i>Cancel
+                    </a>
+                </div>
+
+                <!-- UPI Panel -->
+                <div class="arena-form-card" id="upi-panel" style="display:none;">
+                    <h5 class="rajdhani text-center mb-1">
+                        <span style="font-size:1.4rem;">📱</span> UPI Payment
+                    </h5>
+                    <p class="text-secondary text-center small mb-4">Pay to the UPI ID below and submit your transaction ID</p>
+
+                    <div class="dashboard-hud text-center mb-4 p-3">
+                        <div class="text-secondary small mb-1">Pay to this UPI ID</div>
+                        <div class="orbitron fw-bold text-cyan" style="font-size:1.2rem;" id="upi-id-display">
+                            {{ upi_id|default:"nsritesports@upi" }}
+                        </div>
+                        <button onclick="copyUPI()" class="btn btn-arena-ghost btn-sm mt-2">
+                            <i class="bi bi-clipboard me-1"></i>Copy UPI ID
+                        </button>
+                        <div class="mt-2">
+                            <span class="text-gold fw-bold" style="font-size:1.1rem;">Amount: ₹{{ amount_inr }}</span>
+                        </div>
+                    </div>
+
+                    <div class="p-3 mb-3" style="background:rgba(255,193,7,0.1);border:1px solid rgba(255,193,7,0.3);border-radius:6px;">
+                        <div class="text-warning small">
+                            <i class="bi bi-info-circle me-1"></i>
+                            <strong>Steps:</strong> Open any UPI app → Pay ₹{{ amount_inr }} to the UPI ID above → Note the Transaction ID → Submit below
+                        </div>
+                    </div>
+
+                    <form method="post" action="{% url 'payments:upi_submit' tournament.slug %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Transaction ID / UTR Number <span class="text-red">*</span></label>
+                            <input type="text" name="transaction_id" class="form-control cyber-input"
+                                   placeholder="e.g. 407311982345" maxlength="50" required>
+                            <div class="text-secondary small mt-1">12-digit number from your UPI app payment receipt</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">UPI App Used</label>
+                            <select name="upi_app" class="form-select cyber-select">
+                                <option value="GPay">Google Pay</option>
+                                <option value="PhonePe">PhonePe</option>
+                                <option value="Paytm">Paytm</option>
+                                <option value="BHIM">BHIM</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-arena-primary w-100 py-3">
+                            <i class="bi bi-check-circle me-2"></i>Submit Payment Details
+                        </button>
+                    </form>
+
+                    <button onclick="showMethods()" class="btn btn-arena-ghost w-100 mt-2">← Back to payment options</button>
+                </div>
+
+                <!-- Razorpay Panel -->
+                <div class="arena-form-card" id="razorpay-panel" style="display:none;">
+                    <h5 class="rajdhani text-center mb-1">
+                        <span style="font-size:1.4rem;">💳</span> Card / Net Banking
+                    </h5>
+                    <p class="text-secondary text-center small mb-4">Pay securely via Razorpay</p>
+
+                    <form id="payment-form" method="POST" action="{% url 'payments:success' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
+                        <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+                        <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+                    </form>
+
+                    <button id="razorpay-btn" class="btn btn-arena-primary w-100 py-3" onclick="openRazorpay()">
+                        <i class="bi bi-lock-fill me-2"></i>Pay ₹{{ amount_inr }} via Razorpay
+                    </button>
+                    <button onclick="showMethods()" class="btn btn-arena-ghost w-100 mt-2">← Back to payment options</button>
+                    <p class="text-secondary text-center mt-3" style="font-size:0.75rem;">
+                        <i class="bi bi-shield-check me-1"></i>Secured by Razorpay
+                    </p>
+                </div>
+
             </div>
         </div>
     </div>
@@ -81,6 +156,27 @@
 {% block extra_js %}
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
+function showUPI() {
+    document.getElementById('method-selector').style.display = 'none';
+    document.getElementById('upi-panel').style.display = 'block';
+    document.getElementById('razorpay-panel').style.display = 'none';
+}
+function showRazorpay() {
+    document.getElementById('method-selector').style.display = 'none';
+    document.getElementById('upi-panel').style.display = 'none';
+    document.getElementById('razorpay-panel').style.display = 'block';
+}
+function showMethods() {
+    document.getElementById('method-selector').style.display = 'block';
+    document.getElementById('upi-panel').style.display = 'none';
+    document.getElementById('razorpay-panel').style.display = 'none';
+}
+function copyUPI() {
+    var upiId = document.getElementById('upi-id-display').innerText.trim();
+    navigator.clipboard.writeText(upiId).then(function() {
+        alert('UPI ID copied: ' + upiId);
+    });
+}
 function openRazorpay() {
     var options = {
         "key": "{{ razorpay_key }}",
@@ -94,20 +190,14 @@ function openRazorpay() {
             "email": "{{ user_email }}",
             "contact": "{{ user_phone }}"
         },
-        "theme": {
-            "color": "#C41212"
-        },
+        "theme": { "color": "#C41212" },
         "handler": function(response) {
             document.getElementById('razorpay_order_id').value = response.razorpay_order_id;
             document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
             document.getElementById('razorpay_signature').value = response.razorpay_signature;
             document.getElementById('payment-form').submit();
         },
-        "modal": {
-            "ondismiss": function() {
-                console.log("Payment cancelled by user.");
-            }
-        }
+        "modal": { "ondismiss": function() { console.log("Payment cancelled."); } }
     };
     var rzp = new Razorpay(options);
     rzp.open();
