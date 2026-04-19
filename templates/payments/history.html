@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Payment History — NSRIT eSports Arena{% endblock %}
+{% block content %}
+<section class="page-header"><div class="container-xl"><h1 class="page-title"><i class="bi bi-receipt text-red me-2"></i>Payment <span class="text-cyan">History</span></h1></div></section>
+<section class="py-4"><div class="container-xl">
+    <div class="dashboard-hud">
+        <div class="hud-title"><i class="bi bi-credit-card-fill"></i>All Transactions</div>
+        {% if payments %}
+        <div class="table-responsive">
+            <table class="table arena-table mb-0">
+                <thead><tr><th>Tournament</th><th>Amount</th><th>Razorpay ID</th><th>Status</th><th>Date</th></tr></thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <td><span class="rajdhani fw-bold">{{ payment.tournament.title }}</span><br><small class="text-secondary">{{ payment.tournament.game }}</small></td>
+                        <td><span class="text-gold fw-bold orbitron">₹{{ payment.amount_inr }}</span></td>
+                        <td><code class="text-secondary" style="font-size:0.75rem;">{{ payment.razorpay_payment_id|default:"—" }}</code></td>
+                        <td>
+                            <span class="status-badge {% if payment.status == 'SUCCESS' %}status-registration_open{% elif payment.status == 'FAILED' %}status-cancelled{% else %}status-upcoming{% endif %}">
+                                {{ payment.status }}
+                            </span>
+                        </td>
+                        <td class="text-secondary small">{{ payment.created_at|date:"d M Y H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state text-center py-4"><div class="empty-icon">💳</div><p class="text-secondary">No payment history yet.</p><a href="{% url 'tournaments:list' %}" class="btn btn-arena-sm">Find Tournaments</a></div>
+        {% endif %}
+    </div>
+</div></section>
+{% endblock %}

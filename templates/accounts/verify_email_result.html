@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Email Verification — NSRIT eSports Arena{% endblock %}
+{% block content %}
+<section class="d-flex align-items-center justify-content-center py-5" style="min-height:85vh;">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-5 col-md-7">
+        <div class="text-center mb-4">
+          <svg width="70" height="70" viewBox="0 0 70 70">
+            <polygon points="35,4 66,20 66,50 35,66 4,50 4,20" fill="none" stroke="#C41212" stroke-width="2"/>
+            <polygon points="35,14 56,26 56,44 35,56 14,44 14,26" fill="#C41212" opacity="0.2"/>
+            <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle"
+                  fill="#FFFFFF" font-family="Orbitron" font-size="18" font-weight="900">NSR</text>
+          </svg>
+        </div>
+
+        <div class="arena-form-card text-center">
+
+          {% if status == 'success' %}
+            <div style="font-size:3.5rem;" class="mb-3">✅</div>
+            <h4 class="rajdhani mb-2" style="color:#00F5FF;">Email Verified!</h4>
+            <p class="text-secondary mb-4">
+              Welcome to the arena, <strong class="text-white">{{ user.first_name }}</strong>!
+              Your <strong>@nsrit.edu.in</strong> email has been verified successfully.
+            </p>
+            <div class="arena-alert p-3 mb-4 text-start"
+                 style="background:#00F5FF11; border:1px solid #00F5FF44; border-radius:8px;">
+              <p class="mb-0 small">
+                <i class="bi bi-shield-check-fill text-cyan me-2"></i>
+                Your account is now active. Log in and start competing!
+              </p>
+            </div>
+            <a href="{% url 'accounts:login' %}" class="btn btn-arena-primary w-100 py-3">
+              <i class="bi bi-play-circle-fill me-2"></i>Enter the Arena
+            </a>
+
+          {% elif status == 'already_used' %}
+            <div style="font-size:3.5rem;" class="mb-3">ℹ️</div>
+            <h4 class="rajdhani mb-2" style="color:#00F5FF;">Already Verified</h4>
+            <p class="text-secondary mb-4">{{ message }}</p>
+            <a href="{% url 'accounts:login' %}" class="btn btn-arena-primary w-100 py-3">
+              <i class="bi bi-play-circle-fill me-2"></i>Go to Login
+            </a>
+
+          {% elif status == 'expired' %}
+            <div style="font-size:3.5rem;" class="mb-3">⏰</div>
+            <h4 class="rajdhani mb-2" style="color:#C41212;">Link Expired</h4>
+            <p class="text-secondary mb-4">{{ message }}</p>
+            <a href="{% url 'accounts:resend_verification' %}" class="btn btn-arena-primary w-100 py-3 mb-2">
+              <i class="bi bi-arrow-clockwise me-2"></i>Request New Verification Email
+            </a>
+
+          {% else %}
+            <div style="font-size:3.5rem;" class="mb-3">❌</div>
+            <h4 class="rajdhani mb-2" style="color:#C41212;">Invalid Link</h4>
+            <p class="text-secondary mb-4">
+              {{ message|default:"This verification link is invalid or has been tampered with." }}
+            </p>
+            <a href="{% url 'accounts:resend_verification' %}" class="btn btn-outline-arena w-100 mb-2">
+              <i class="bi bi-arrow-clockwise me-2"></i>Request New Link
+            </a>
+            <a href="{% url 'accounts:register' %}" class="btn btn-arena-primary w-100 py-3">
+              <i class="bi bi-person-plus-fill me-2"></i>Register Again
+            </a>
+          {% endif %}
+
+          <hr class="red-divider my-3">
+          <a href="{% url 'home' %}" class="text-secondary small text-decoration-none">
+            ← Back to Home
+          </a>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

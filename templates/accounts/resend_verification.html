@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Resend Verification Email — NSRIT eSports Arena{% endblock %}
+{% block content %}
+<section class="d-flex align-items-center justify-content-center py-5" style="min-height:85vh;">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-4 col-md-6">
+        <div class="text-center mb-4">
+          <svg width="70" height="70" viewBox="0 0 70 70">
+            <polygon points="35,4 66,20 66,50 35,66 4,50 4,20" fill="none" stroke="#C41212" stroke-width="2"/>
+            <polygon points="35,14 56,26 56,44 35,56 14,44 14,26" fill="#C41212" opacity="0.2"/>
+            <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle"
+                  fill="#FFFFFF" font-family="Orbitron" font-size="18" font-weight="900">NSR</text>
+          </svg>
+          <h2 class="orbitron mt-2 mb-0" style="font-size:1.2rem;">
+            Resend <span class="text-red">Verification</span>
+          </h2>
+        </div>
+
+        <div class="arena-form-card">
+          <h5 class="rajdhani text-center mb-4">
+            <i class="bi bi-envelope-fill text-cyan me-2"></i>
+            Resend Verification Email
+          </h5>
+          <p class="text-secondary small text-center mb-4">
+            Enter your NSRIT email address and we'll send you a fresh verification link.
+          </p>
+
+          <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="mb-4">
+              <label class="form-label">NSRIT Email Address</label>
+              {{ form.email }}
+              {% if form.email.errors %}
+              <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+              {% endif %}
+            </div>
+            <button type="submit" class="btn btn-arena-primary w-100 py-3">
+              <i class="bi bi-send-fill me-2"></i>Send Verification Email
+            </button>
+          </form>
+
+          <hr class="red-divider my-3">
+          <p class="text-center text-secondary small">
+            Already verified?
+            <a href="{% url 'accounts:login' %}" class="text-red text-decoration-none fw-bold">Login here</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

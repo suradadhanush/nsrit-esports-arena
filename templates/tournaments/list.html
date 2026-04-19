@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}Tournaments — NSRIT eSports Arena{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container-xl">
+        <h1 class="page-title"><i class="bi bi-trophy-fill text-red me-2"></i>Tournament <span class="text-cyan">Arena</span></h1>
+        <p class="text-secondary">Browse and register for campus esports competitions</p>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="container-xl">
+        <!-- Filter Bar -->
+        <form method="get" class="filter-bar mb-4">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-3">
+                    <input type="text" name="search" class="form-control cyber-input"
+                           placeholder="Search tournaments..." value="{{ filters.search }}">
+                </div>
+                <div class="col-md-2">
+                    <select name="game" class="form-select cyber-select">
+                        <option value="">All Games</option>
+                        {% for val, label in game_choices %}
+                        <option value="{{ val }}" {% if filters.game == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="mode" class="form-select cyber-select">
+                        <option value="">All Modes</option>
+                        {% for val, label in mode_choices %}
+                        <option value="{{ val }}" {% if filters.mode == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="status" class="form-select cyber-select">
+                        <option value="">All Status</option>
+                        {% for val, label in status_choices %}
+                        <option value="{{ val }}" {% if filters.status == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-arena-primary flex-fill">
+                        <i class="bi bi-search me-1"></i>Filter
+                    </button>
+                    <a href="{% url 'tournaments:list' %}" class="btn btn-arena-ghost">Reset</a>
+                </div>
+            </div>
+        </form>
+
+        <!-- Tournament Grid -->
+        {% if tournaments %}
+        <div class="row g-4">
+            {% for tournament in tournaments %}
+            <div class="col-lg-4 col-md-6">
+                <div class="tournament-card h-100">
+                    {% if tournament.is_featured %}
+                    <div class="card-badge-featured">⭐ FEATURED</div>
+                    {% endif %}
+                    <div class="card-game-icon">
+                        {% if tournament.game == 'BGMI' %}🎯
+                        {% elif tournament.game == 'VALORANT' %}⚔️
+                        {% elif tournament.game == 'COD' %}💥
+                        {% elif tournament.game == 'FREE_FIRE' %}🔥
+                        {% elif tournament.game == 'CS2' %}💣
+                        {% elif tournament.game == 'FIFA' %}⚽
+                        {% else %}🎮{% endif %}
+                    </div>
+                    <div class="card-body-arena">
+                        <div class="card-tags mb-2">
+                            <span class="tag-game">{{ tournament.game }}</span>
+                            <span class="tag-mode">{{ tournament.get_mode_display }}</span>
+                        </div>
+                        <h5 class="card-title-arena rajdhani">{{ tournament.title }}</h5>
+                        <p class="card-text-arena text-secondary small">{{ tournament.description|truncatechars:90 }}</p>
+
+                        <div class="card-stats d-flex justify-content-between mt-3">
+                            <div class="card-stat">
+                                <span class="stat-label">Prize Pool</span>
+                                <span class="stat-val text-gold">₹{{ tournament.prize_pool }}</span>
+                            </div>
+                            <div class="card-stat">
+                                <span class="stat-label">Entry Fee</span>
+                                <span class="stat-val {% if tournament.entry_fee == 0 %}text-green{% else %}text-cyan{% endif %}">
+                                    {% if tournament.entry_fee == 0 %}FREE{% else %}₹{{ tournament.entry_fee }}{% endif %}
+                                </span>
+                            </div>
+                            <div class="card-stat">
+                                <span class="stat-label">Slots Left</span>
+                                <span class="stat-val text-red">{{ tournament.slots_remaining }}</span>
+                            </div>
+                        </div>
+
+                        <div class="slot-bar mt-2 mb-3">
+                            <div class="slot-fill" style="width:{{ tournament.fill_percentage }}%"></div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="status-badge status-{{ tournament.status|lower }}">
+                                {{ tournament.get_status_display }}
+                            </span>
+                            <div class="d-flex gap-2">
+                                <a href="{{ tournament.get_absolute_url }}" class="btn btn-arena-sm">
+                                    Details <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="mt-2 d-flex gap-2 text-secondary" style="font-size:0.75rem;">
+                            <span><i class="bi bi-calendar3 me-1"></i>{{ tournament.start_date|date:"d M Y" }}</span>
+                            <span><i class="bi bi-clock me-1"></i>Reg. ends {{ tournament.registration_deadline|date:"d M" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state text-center py-5">
+            <div class="empty-icon">🏆</div>
+            <h5 class="rajdhani">No Tournaments Found</h5>
+            <p class="text-secondary">Try adjusting your filters or check back later.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

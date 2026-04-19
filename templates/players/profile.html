@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ player.ign }} — NSRIT eSports Arena{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container-xl">
+        <div class="d-flex align-items-center gap-3">
+            <div class="player-avatar" style="width:56px;height:56px;">
+                {% if player.user.avatar %}
+                    <img src="{{ player.user.avatar.url }}" alt="Avatar">
+                {% else %}
+                    <span style="font-size:1.4rem;">🎮</span>
+                {% endif %}
+            </div>
+            <div>
+                <h1 class="page-title mb-0">{{ player.ign }}</h1>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="text-secondary small">{{ player.user.roll_number }} · {{ player.user.get_branch_display }}</span>
+                    <span class="player-tier-badge">{{ player.tier }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="container-xl">
+        <div class="row g-4">
+
+            <!-- ── LEFT: Stats + Games ── -->
+            <div class="col-lg-4">
+                <div class="dashboard-hud mb-4">
+                    <div class="hud-corner hud-corner-tl"></div>
+                    <div class="hud-corner hud-corner-tr"></div>
+                    <div class="hud-corner hud-corner-bl"></div>
+                    <div class="hud-corner hud-corner-br"></div>
+                    <div class="hud-title"><i class="bi bi-person-fill"></i> Player Info</div>
+                    <div class="mt-3 d-flex flex-column gap-2">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-secondary small">Full Name</span>
+                            <span class="rajdhani fw-600">{{ player.user.get_full_name }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-secondary small">Roll Number</span>
+                            <span class="rajdhani fw-600 text-cyan">{{ player.user.roll_number }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-secondary small">Branch</span>
+                            <span class="rajdhani fw-600">{{ player.user.get_branch_display }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-secondary small">Year</span>
+                            <span class="rajdhani fw-600">{{ player.user.get_year_display }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-secondary small">Primary Game</span>
+                            <span class="rajdhani fw-600 text-red">{{ player.get_primary_game_display }}</span>
+                        </div>
+                        {% if player.secondary_game %}
+                        <div class="d-flex justify-content-between">
+                            <span class="text-secondary small">Secondary Game</span>
+                            <span class="rajdhani fw-600">{{ player.get_secondary_game_display }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="d-flex justify-content-between">
+                            <span class="text-secondary small">Game ID</span>
+                            <span class="rajdhani fw-600">{{ player.game_id }}</span>
+                        </div>
+                        {% if player.discord_id %}
+                        <div class="d-flex justify-content-between">
+                            <span class="text-secondary small">Discord</span>
+                            <span class="rajdhani fw-600">{{ player.discord_id }}</span>
+                        </div>
+                        {% endif %}
+                        {% if player.instagram_handle %}
+                        <div class="d-flex justify-content-between">
+                            <span class="text-secondary small">Instagram</span>
+                            <span class="rajdhani fw-600">@{{ player.instagram_handle }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="d-flex justify-content-between">
+                            <span class="text-secondary small">Recruitment</span>
+                            <span class="rajdhani fw-600 {% if player.is_available %}text-green{% else %}text-secondary{% endif %}">
+                                {% if player.is_available %}✅ Open{% else %}❌ Unavailable{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {% if player.bio %}
+                <div class="dashboard-hud">
+                    <div class="hud-corner hud-corner-tl"></div>
+                    <div class="hud-corner hud-corner-tr"></div>
+                    <div class="hud-corner hud-corner-bl"></div>
+                    <div class="hud-corner hud-corner-br"></div>
+                    <div class="hud-title"><i class="bi bi-chat-quote-fill"></i> Bio</div>
+                    <p class="text-secondary mt-2 mb-0 small">{{ player.bio }}</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- ── RIGHT: Combat Stats ── -->
+            <div class="col-lg-8">
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        <div class="dashboard-hud text-center">
+                            <div class="hud-corner hud-corner-tl"></div>
+                            <div class="hud-corner hud-corner-tr"></div>
+                            <div class="hud-corner hud-corner-bl"></div>
+                            <div class="hud-corner hud-corner-br"></div>
+                            <div class="hud-title justify-content-center">Rank Pts</div>
+                            <div class="hud-value text-cyan">{{ player.rank_points }}</div>
+                            <div class="hud-sub">{{ player.tier }}</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="dashboard-hud text-center">
+                            <div class="hud-corner hud-corner-tl"></div>
+                            <div class="hud-corner hud-corner-tr"></div>
+                            <div class="hud-corner hud-corner-bl"></div>
+                            <div class="hud-corner hud-corner-br"></div>
+                            <div class="hud-title justify-content-center">Win Rate</div>
+                            <div class="hud-value text-gold">{{ player.win_rate }}%</div>
+                            <div class="hud-sub">{{ player.total_wins }}W / {{ player.total_matches }}M</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="dashboard-hud text-center">
+                            <div class="hud-corner hud-corner-tl"></div>
+                            <div class="hud-corner hud-corner-tr"></div>
+                            <div class="hud-corner hud-corner-bl"></div>
+                            <div class="hud-corner hud-corner-br"></div>
+                            <div class="hud-title justify-content-center">K/D Ratio</div>
+                            <div class="hud-value text-green">{{ player.kd_ratio }}</div>
+                            <div class="hud-sub">{{ player.total_kills }} Kills</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="dashboard-hud text-center">
+                            <div class="hud-corner hud-corner-tl"></div>
+                            <div class="hud-corner hud-corner-tr"></div>
+                            <div class="hud-corner hud-corner-bl"></div>
+                            <div class="hud-corner hud-corner-br"></div>
+                            <div class="hud-title justify-content-center">T. Wins</div>
+                            <div class="hud-value text-red">{{ player.tournament_wins }}</div>
+                            <div class="hud-sub">Champion</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tournament history -->
+                <div class="dashboard-hud">
+                    <div class="hud-corner hud-corner-tl"></div>
+                    <div class="hud-corner hud-corner-tr"></div>
+                    <div class="hud-corner hud-corner-bl"></div>
+                    <div class="hud-corner hud-corner-br"></div>
+                    <div class="hud-title"><i class="bi bi-trophy-fill"></i> Tournament History</div>
+                    {% with regs=player.registrations.all %}
+                    {% if regs %}
+                    <div class="table-responsive mt-3">
+                        <table class="table arena-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Tournament</th>
+                                    <th>Game</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reg in regs|slice:":8" %}
+                                <tr>
+                                    <td><a href="{{ reg.tournament.get_absolute_url }}" class="text-cyan text-decoration-none">{{ reg.tournament.title }}</a></td>
+                                    <td><span class="badge bg-dark border border-secondary">{{ reg.tournament.game }}</span></td>
+                                    <td>
+                                        {% if reg.status == 'CONFIRMED' %}
+                                            <span class="badge bg-success">Confirmed</span>
+                                        {% elif reg.status == 'PENDING' %}
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        {% elif reg.status == 'CANCELLED' %}
+                                            <span class="badge bg-secondary">Cancelled</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">{{ reg.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-secondary text-center mt-4 mb-2">No tournaments yet. <a href="{% url 'tournaments:list' %}" class="text-cyan">Browse tournaments →</a></p>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+
+                {% if request.user == player.user %}
+                <div class="mt-3 d-flex gap-2">
+                    <a href="{% url 'players:edit_profile' %}" class="btn btn-arena-ghost btn-sm">
+                        <i class="bi bi-pencil me-1"></i>Edit Profile
+                    </a>
+                    <a href="{% url 'players:dashboard' %}" class="btn btn-arena-primary btn-sm">
+                        <i class="bi bi-grid-fill me-1"></i>My Dashboard
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</section>
+{% endblock %}

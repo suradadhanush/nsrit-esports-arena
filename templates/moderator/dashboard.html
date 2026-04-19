@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Moderator Dashboard — NSRIT eSports Arena{% endblock %}
+{% block content %}
+<section class="page-header">
+  <div class="container-xl">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div>
+        <h1 class="page-title mb-0">
+          {% if request.user.is_superuser %}👑 Super Admin{% else %}🛡️ Moderator{% endif %}
+          <span class="text-red">Control Room</span>
+        </h1>
+        <div class="text-secondary small">{{ request.user.get_full_name }} · {{ request.user.email }}</div>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'moderator:registrations' %}" class="btn btn-arena-ghost btn-sm">📋 Registrations</a>
+        <a href="{% url 'moderator:payments' %}" class="btn btn-arena-ghost btn-sm">💳 Payments</a>
+        <a href="{% url 'moderator:players' %}" class="btn btn-arena-ghost btn-sm">🎮 Players</a>
+        <a href="{% url 'moderator:locked_accounts' %}" class="btn btn-arena-ghost btn-sm">🔒 Locked</a>
+        {% if request.user.is_superuser %}
+        <a href="{% url 'admin:index' %}" class="btn btn-arena-primary btn-sm">⚙ Django Admin</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-4">
+  <div class="container-xl">
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="arena-alert arena-alert-{{ message.tags }} p-3 mb-3">{{ message|safe }}</div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Stats Row 1 -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="dashboard-hud text-center">
+          <div class="hud-title justify-content-center">Total Users</div>
+          <div class="hud-value text-cyan">{{ total_users }}</div>
+          <div class="hud-sub">Registered</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="dashboard-hud text-center">
+          <div class="hud-title justify-content-center">Players</div>
+          <div class="hud-value text-red">{{ total_players }}</div>
+          <div class="hud-sub">With profile</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="dashboard-hud text-center">
+          <div class="hud-title justify-content-center">Tournaments</div>
+          <div class="hud-value text-gold">{{ total_tournaments }}</div>
+          <div class="hud-sub">{{ open_tournaments }} open</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="dashboard-hud text-center">
+          <div class="hud-title justify-content-center">Revenue</div>
+          <div class="hud-value text-green">₹{{ total_revenue_inr|floatformat:0 }}</div>
+          <div class="hud-sub">Collected</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Row 2 -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="dashboard-hud text-center">
+          <div class="hud-title justify-content-center">Pending Pay</div>
+          <div class="hud-value" style="color:var(--bs-warning)">{{ pending_payments }}</div>
+          <div class="hud-sub"><a href="{% url 'moderator:payments' %}?status=PENDING" class="text-cyan">View →</a></div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="dashboard-hud text-center">
+          <div class="hud-title justify-content-center">Failed Pay</div>
+          <div class="hud-value text-red">{{ failed_payments }}</div>
+          <div class="hud-sub"><a href="{% url 'moderator:payments' %}?status=FAILED" class="text-cyan">View →</a></div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="dashboard-hud text-center">
+          <div class="hud-title justify-content-center">Locked Accts</div>
+          <div class="hud-value" style="color:orange">{{ locked_accounts }}</div>
+          <div class="hud-sub"><a href="{% url 'moderator:locked_accounts' %}" class="text-cyan">Unlock →</a></div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="dashboard-hud text-center">
+          <div class="hud-title justify-content-center">Pending Reg</div>
+          <div class="hud-value text-cyan">{{ pending_registrations }}</div>
+          <div class="hud-sub"><a href="{% url 'moderator:registrations' %}?status=PENDING" class="text-cyan">View →</a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- Recent Registrations -->
+      <div class="col-lg-6">
+        <div class="dashboard-hud">
+          <div class="hud-title"><i class="bi bi-trophy-fill"></i> Recent Registrations</div>
+          <div class="table-responsive mt-3">
+            <table class="table arena-table mb-0">
+              <thead><tr><th>Player</th><th>Tournament</th><th>Status</th><th>Date</th></tr></thead>
+              <tbody>
+                {% for reg in recent_registrations %}
+                <tr>
+                  <td>{{ reg.player.ign }}</td>
+                  <td class="text-truncate" style="max-width:120px">{{ reg.tournament.title }}</td>
+                  <td>
+                    {% if reg.status == 'CONFIRMED' %}<span class="badge bg-success">Confirmed</span>
+                    {% elif reg.status == 'PENDING' %}<span class="badge bg-warning text-dark">Pending</span>
+                    {% else %}<span class="badge bg-secondary">{{ reg.status }}</span>{% endif %}
+                  </td>
+                  <td class="text-secondary small">{{ reg.registered_at|date:"d M" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="text-center text-secondary">No registrations yet</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-2 text-end"><a href="{% url 'moderator:registrations' %}" class="text-cyan small">View all →</a></div>
+        </div>
+      </div>
+
+      <!-- Recent Payments -->
+      <div class="col-lg-6">
+        <div class="dashboard-hud">
+          <div class="hud-title"><i class="bi bi-credit-card-fill"></i> Recent Payments</div>
+          <div class="table-responsive mt-3">
+            <table class="table arena-table mb-0">
+              <thead><tr><th>Player</th><th>Tournament</th><th>Amount</th><th>Status</th></tr></thead>
+              <tbody>
+                {% for p in recent_payments %}
+                <tr>
+                  <td>{{ p.player.ign }}</td>
+                  <td class="text-truncate" style="max-width:100px">{{ p.tournament.title }}</td>
+                  <td>₹{{ p.amount_inr|floatformat:0 }}</td>
+                  <td>
+                    {% if p.status == 'SUCCESS' %}<span class="badge bg-success">✅ Paid</span>
+                    {% elif p.status == 'PENDING' %}<span class="badge bg-warning text-dark">⏳ Pending</span>
+                    {% elif p.status == 'FAILED' %}<span class="badge bg-danger">❌ Failed</span>
+                    {% else %}<span class="badge bg-secondary">{{ p.status }}</span>{% endif %}
+                  </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="text-center text-secondary">No payments yet</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-2 text-end"><a href="{% url 'moderator:payments' %}" class="text-cyan small">View all →</a></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

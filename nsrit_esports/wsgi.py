@@ -1,0 +1,8 @@
+"""
+WSGI config for NSRIT eSports Arena
+"""
+import os
+from django.core.wsgi import get_wsgi_application
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nsrit_esports.settings')
+application = get_wsgi_application()

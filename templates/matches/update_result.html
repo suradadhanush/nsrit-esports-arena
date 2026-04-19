@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Update Match Result — NSRIT eSports Arena{% endblock %}
+{% block content %}
+<section class="page-header"><div class="container"><h1 class="page-title"><i class="bi bi-pencil-fill text-red me-2"></i>Update <span class="text-cyan">Match Result</span></h1></div></section>
+<section class="py-5"><div class="container"><div class="row justify-content-center"><div class="col-lg-5">
+    <div class="arena-form-card">
+        <h5 class="rajdhani text-center mb-3">{{ match }}</h5>
+        <div class="mb-3 text-center">
+            <span class="tag-game">{{ match.get_round_name_display }}</span>
+            <span class="mini-tag ms-2">Match {{ match.match_number }}</span>
+        </div>
+        <form method="post">{% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Score — {{ match.team1.name|default:match.player1.ign|default:"Participant 1" }}</label>
+                <input type="number" name="score1" class="form-control cyber-input" value="{{ match.team1_score }}" min="0">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Score — {{ match.team2.name|default:match.player2.ign|default:"Participant 2" }}</label>
+                <input type="number" name="score2" class="form-control cyber-input" value="{{ match.team2_score }}" min="0">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Winner</label>
+                <select name="winner" class="form-select cyber-select">
+                    {% if match.team1 %}<option value="{{ match.team1.id }}">{{ match.team1.name }}</option>{% endif %}
+                    {% if match.team2 %}<option value="{{ match.team2.id }}">{{ match.team2.name }}</option>{% endif %}
+                    {% if match.player1 %}<option value="{{ match.player1.id }}">{{ match.player1.ign }}</option>{% endif %}
+                    {% if match.player2 %}<option value="{{ match.player2.id }}">{{ match.player2.ign }}</option>{% endif %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-arena-primary w-100 py-3"><i class="bi bi-check-circle me-2"></i>Save Result</button>
+            <a href="{% url 'matches:bracket' slug=match.tournament.slug %}" class="btn btn-arena-ghost w-100 mt-2">Cancel</a>
+        </form>
+    </div>
+</div></div></div></section>
+{% endblock %}

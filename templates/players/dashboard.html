@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard — NSRIT eSports Arena{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container-xl">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="player-avatar" style="width:56px;height:56px;">
+                    {% if request.user.avatar %}
+                        <img src="{{ request.user.avatar.url }}" alt="Avatar">
+                    {% else %}
+                        <span style="font-size:1.4rem;">🎮</span>
+                    {% endif %}
+                </div>
+                <div>
+                    <h1 class="page-title mb-0">{{ request.user.first_name }}'s <span class="text-red">HUD</span></h1>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-secondary small">{{ player.ign }}</span>
+                        <span class="player-tier-badge">{{ player.tier }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'players:edit_profile' %}" class="btn btn-arena-ghost btn-sm">
+                    <i class="bi bi-pencil me-1"></i>Edit Profile
+                </a>
+                <a href="{% url 'tournaments:list' %}" class="btn btn-arena-primary btn-sm">
+                    <i class="bi bi-trophy-fill me-1"></i>Join Tournament
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="container-xl">
+
+        <!-- ── ROW 1: STATS HUD ── -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="dashboard-hud text-center">
+                    <div class="hud-corner hud-corner-tl"></div>
+                    <div class="hud-corner hud-corner-tr"></div>
+                    <div class="hud-corner hud-corner-bl"></div>
+                    <div class="hud-corner hud-corner-br"></div>
+                    <div class="hud-title justify-content-center">Tournaments</div>
+                    <div class="hud-value text-red">{{ total_registrations }}</div>
+                    <div class="hud-sub">Registered</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="dashboard-hud text-center">
+                    <div class="hud-corner hud-corner-tl"></div>
+                    <div class="hud-corner hud-corner-tr"></div>
+                    <div class="hud-corner hud-corner-bl"></div>
+                    <div class="hud-corner hud-corner-br"></div>
+                    <div class="hud-title justify-content-center">Rank Points</div>
+                    <div class="hud-value text-cyan">{{ player.rank_points }}</div>
+                    <div class="hud-sub">{{ player.tier }}</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="dashboard-hud text-center">
+                    <div class="hud-corner hud-corner-tl"></div>
+                    <div class="hud-corner hud-corner-tr"></div>
+                    <div class="hud-corner hud-corner-bl"></div>
+                    <div class="hud-corner hud-corner-br"></div>
+                    <div class="hud-title justify-content-center">Win Rate</div>
+                    <div class="hud-value text-gold">{{ player.win_rate }}%</div>
+                    <div class="hud-sub">{{ player.total_wins }}W / {{ player.total_matches }}M</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="dashboard-hud text-center">
+                    <div class="hud-corner hud-corner-tl"></div>
+                    <div class="hud-corner hud-corner-tr"></div>
+                    <div class="hud-corner hud-corner-bl"></div>
+                    <div class="hud-corner hud-corner-br"></div>
+                    <div class="hud-title justify-content-center">K/D Ratio</div>
+                    <div class="hud-value text-green">{{ player.kd_ratio }}</div>
+                    <div class="hud-sub">{{ player.total_kills }} Kills</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- ── LEFT COLUMN ── -->
+            <div class="col-lg-8">
+
+                <!-- My Tournaments -->
+                <div class="dashboard-hud mb-4">
+                    <div class="hud-title"><i class="bi bi-trophy-fill"></i>My Tournaments</div>
+                    {% if my_registrations %}
+                    <div class="table-responsive">
+                        <table class="table arena-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Tournament</th>
+                                    <th>Game</th>
+                                    <th>Status</th>
+                                    <th>Registered</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reg in my_registrations %}
+                                <tr>
+                                    <td>
+                                        <span class="rajdhani fw-bold">{{ reg.tournament.title }}</span>
+                                    </td>
+                                    <td><span class="tag-game">{{ reg.tournament.game }}</span></td>
+                                    <td>
+                                        <span class="status-badge status-{{ reg.status|lower }}">
+                                            {{ reg.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td class="text-secondary small">{{ reg.registered_at|date:"d M Y" }}</td>
+                                    <td>
+                                        <a href="{{ reg.tournament.get_absolute_url }}" class="btn btn-arena-xs">View</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-end mt-2">
+                        <a href="{% url 'tournaments:my_registrations' %}" class="text-cyan small text-decoration-none">
+                            View all <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="empty-state text-center py-3">
+                        <div class="empty-icon">🏆</div>
+                        <p class="text-secondary mb-2">No tournament registrations yet.</p>
+                        <a href="{% url 'tournaments:list' %}" class="btn btn-arena-sm">Browse Tournaments</a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Upcoming Matches -->
+                <div class="dashboard-hud">
+                    <div class="hud-title"><i class="bi bi-calendar-event"></i>Upcoming Tournaments</div>
+                    {% if upcoming_tournaments %}
+                    <div class="row g-2">
+                        {% for t in upcoming_tournaments %}
+                        <div class="col-md-6">
+                            <div class="tournament-card-mini">
+                                <div class="mini-card-left">
+                                    <div class="mini-game-badge">{{ t.game }}</div>
+                                    <h6 class="mini-card-title rajdhani">{{ t.title }}</h6>
+                                    <small class="text-secondary">{{ t.start_date|date:"d M Y" }}</small>
+                                </div>
+                                <div class="mini-card-right">
+                                    <a href="{{ t.get_absolute_url }}" class="btn btn-arena-xs">View</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-secondary small mb-0">No upcoming tournaments.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- ── RIGHT COLUMN ── -->
+            <div class="col-lg-4">
+
+                <!-- Player Info Card -->
+                <div class="player-card-large mb-3">
+                    <div class="player-card-header">
+                        <div class="player-avatar">
+                            {% if request.user.avatar %}
+                                <img src="{{ request.user.avatar.url }}" alt="Avatar">
+                            {% else %}
+                                <span style="font-size:1.8rem;">⚔️</span>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div class="player-ign">{{ player.ign }}</div>
+                            <div class="text-secondary small">{{ request.user.roll_number }}</div>
+                            <div class="player-tier-badge mt-1">{{ player.tier }}</div>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="row g-2 text-center">
+                            <div class="col-4">
+                                <div class="text-secondary" style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;">Game</div>
+                                <div class="rajdhani fw-bold small">{{ player.primary_game }}</div>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-secondary" style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;">Branch</div>
+                                <div class="rajdhani fw-bold small">{{ request.user.branch }}</div>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-secondary" style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;">Year</div>
+                                <div class="rajdhani fw-bold small">{{ request.user.year }}st/nd</div>
+                            </div>
+                        </div>
+                        {% if player.bio %}
+                        <p class="text-secondary small mt-2 mb-0">{{ player.bio }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- My Team -->
+                <div class="dashboard-hud mb-3">
+                    <div class="hud-title"><i class="bi bi-people-fill"></i>My Team</div>
+                    {% if my_team %}
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="orbitron fw-bold text-cyan">{{ my_team.name }}</span>
+                        <span class="mini-tag">[{{ my_team.tag }}]</span>
+                    </div>
+                    <div class="text-secondary small mb-2">{{ my_team.member_count }} members • {{ my_team.game }}</div>
+                    <a href="{{ my_team.get_absolute_url }}" class="btn btn-arena-xs w-100">View Team</a>
+                    {% else %}
+                    <p class="text-secondary small mb-2">Not in a team yet.</p>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'teams:create' %}" class="btn btn-arena-xs flex-fill">Create Team</a>
+                        <a href="{% url 'teams:list' %}" class="btn btn-arena-ghost btn-sm flex-fill" style="font-size:0.75rem;">Find Team</a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Payment History -->
+                <div class="dashboard-hud">
+                    <div class="hud-title"><i class="bi bi-credit-card-fill"></i>Recent Payments</div>
+                    {% if recent_payments %}
+                        {% for payment in recent_payments %}
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom" style="border-color:var(--border) !important;">
+                            <div>
+                                <div class="rajdhani fw-bold small">{{ payment.tournament.title }}</div>
+                                <div class="text-secondary" style="font-size:0.7rem;">{{ payment.created_at|date:"d M Y" }}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-gold fw-bold small">₹{{ payment.amount_inr }}</div>
+                                <span class="status-badge status-{{ payment.status|lower }}" style="font-size:0.6rem;padding:1px 6px;">
+                                    {{ payment.status }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    <a href="{% url 'payments:history' %}" class="text-cyan small text-decoration-none">
+                        Full history <i class="bi bi-arrow-right"></i>
+                    </a>
+                    {% else %}
+                    <p class="text-secondary small mb-0">No payment history.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

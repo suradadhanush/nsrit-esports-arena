@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Locked Accounts — Moderator{% endblock %}
+{% block content %}
+<section class="page-header">
+  <div class="container-xl">
+    <h1 class="page-title">🔒 <span class="text-red">Locked Accounts</span></h1>
+  </div>
+</section>
+<section class="py-4">
+  <div class="container-xl">
+    <div class="mb-3"><a href="{% url 'moderator:dashboard' %}" class="btn btn-arena-ghost btn-sm">← Back</a></div>
+    {% if messages %}{% for m in messages %}<div class="arena-alert p-3 mb-3">{{ m }}</div>{% endfor %}{% endif %}
+    <div class="dashboard-hud">
+      <div class="table-responsive">
+        <table class="table arena-table">
+          <thead><tr><th>Email</th><th>Name</th><th>Failed Attempts</th><th>Locked Until</th><th>Action</th></tr></thead>
+          <tbody>
+            {% for user in locked %}
+            <tr>
+              <td>{{ user.email }}</td>
+              <td>{{ user.get_full_name }}</td>
+              <td><span class="badge bg-warning text-dark">{{ user.failed_login_attempts }} fails</span></td>
+              <td class="text-secondary small">{{ user.account_locked_until|date:"d M Y H:i" }}</td>
+              <td><a href="{% url 'moderator:unlock_account' user.id %}" class="btn btn-sm btn-arena-primary">🔓 Unlock</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-secondary py-4">✅ No locked accounts.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verify Your NSRIT eSports Email</title>
+<style>
+  body { margin:0; padding:0; background:#0B0F1A; font-family: Inter, Arial, sans-serif; color:#FFFFFF; }
+  .wrapper { max-width:600px; margin:0 auto; background:#0B0F1A; }
+  .header { background: linear-gradient(135deg, #C41212 0%, #8A2BE2 100%); padding:40px 30px; text-align:center; }
+  .header h1 { margin:0; font-size:28px; font-weight:900; letter-spacing:2px; color:#fff; }
+  .header p { margin:8px 0 0; color:rgba(255,255,255,0.8); font-size:14px; }
+  .hex-logo { width:70px; height:70px; margin:0 auto 15px; }
+  .body { padding:40px 30px; background:#111827; }
+  .greeting { font-size:18px; font-weight:600; color:#00F5FF; margin-bottom:15px; }
+  .message { color:#B8C1CC; font-size:15px; line-height:1.6; margin-bottom:25px; }
+  .btn-wrapper { text-align:center; margin:30px 0; }
+  .btn { display:inline-block; background:linear-gradient(135deg,#C41212,#8A2BE2); color:#fff !important;
+         text-decoration:none; padding:16px 40px; border-radius:6px; font-size:16px;
+         font-weight:700; letter-spacing:1px; }
+  .btn:hover { background:linear-gradient(135deg,#e01414,#9b3cf5); }
+  .link-box { background:#0B0F1A; border:1px solid #00F5FF33; border-radius:6px;
+              padding:12px 16px; margin:20px 0; word-break:break-all;
+              font-size:12px; color:#00F5FF; }
+  .warning { background:#C412120D; border-left:4px solid #C41212;
+             padding:12px 16px; border-radius:0 6px 6px 0; color:#B8C1CC;
+             font-size:13px; margin-top:20px; }
+  .footer { background:#0B0F1A; padding:25px 30px; text-align:center;
+            border-top:1px solid #C4121233; }
+  .footer p { color:#4A5568; font-size:12px; margin:4px 0; }
+  .neon-line { height:2px; background:linear-gradient(90deg,transparent,#00F5FF,transparent); margin:0; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <!-- Header -->
+  <div class="header">
+    <svg class="hex-logo" viewBox="0 0 70 70">
+      <polygon points="35,4 66,20 66,50 35,66 4,50 4,20" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
+      <polygon points="35,14 56,26 56,44 35,56 14,44 14,26" fill="rgba(255,255,255,0.1)"/>
+      <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="#FFFFFF"
+            font-family="Arial" font-size="16" font-weight="900">NSR</text>
+    </svg>
+    <h1>NSRIT eSports Arena</h1>
+    <p>Where Campus Legends Rise</p>
+  </div>
+  <div class="neon-line"></div>
+
+  <!-- Body -->
+  <div class="body">
+    <p class="greeting">🎮 Hey {{ user.first_name }},</p>
+    <p class="message">
+      Welcome to <strong>NSRIT eSports Arena</strong>! Your account has been created successfully
+      with roll number <strong>{{ user.roll_number }}</strong>.
+    </p>
+    <p class="message">
+      To activate your account and start competing in tournaments, please verify your
+      <strong>@nsrit.edu.in</strong> email address by clicking the button below:
+    </p>
+
+    <div class="btn-wrapper">
+      <a href="{{ verify_url }}" class="btn">✅ VERIFY MY EMAIL</a>
+    </div>
+
+    <p class="message" style="font-size:13px; text-align:center; color:#4A5568;">
+      Button not working? Copy and paste this link into your browser:
+    </p>
+    <div class="link-box">{{ verify_url }}</div>
+
+    <div class="warning">
+      ⏱️ <strong>This link expires in {{ expires_hours }} hours.</strong>
+      If it expires, you can request a new one from the login page.
+      If you didn't create an account, please ignore this email.
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>© 2024 NSRIT eSports Arena · Nadimpalli Satyanarayana Raju Institute of Technology</p>
+    <p>NSRIT Campus, Sontyam, Visakhapatnam – 531173 · esports@nsrit.edu.in</p>
+    <p style="color:#C41212; margin-top:8px;">Do not reply to this email.</p>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Registrations — Moderator{% endblock %}
+{% block content %}
+<section class="page-header">
+  <div class="container-xl">
+    <h1 class="page-title">📋 <span class="text-red">Registrations</span></h1>
+  </div>
+</section>
+<section class="py-4">
+  <div class="container-xl">
+    <div class="d-flex gap-2 mb-3 flex-wrap">
+      <a href="{% url 'moderator:dashboard' %}" class="btn btn-arena-ghost btn-sm">← Back</a>
+      <a href="?status=PENDING" class="btn btn-sm {% if status_filter == 'PENDING' %}btn-arena-primary{% else %}btn-arena-ghost{% endif %}">Pending</a>
+      <a href="?status=CONFIRMED" class="btn btn-sm {% if status_filter == 'CONFIRMED' %}btn-arena-primary{% else %}btn-arena-ghost{% endif %}">Confirmed</a>
+      <a href="?status=CANCELLED" class="btn btn-sm {% if status_filter == 'CANCELLED' %}btn-arena-primary{% else %}btn-arena-ghost{% endif %}">Cancelled</a>
+      <a href="?" class="btn btn-arena-ghost btn-sm">All</a>
+    </div>
+    {% if messages %}{% for m in messages %}<div class="arena-alert p-3 mb-3">{{ m }}</div>{% endfor %}{% endif %}
+    <div class="dashboard-hud">
+      <div class="table-responsive">
+        <table class="table arena-table">
+          <thead><tr><th>#</th><th>Player</th><th>Tournament</th><th>Status</th><th>Registered</th><th>Actions</th></tr></thead>
+          <tbody>
+            {% for reg in registrations %}
+            <tr>
+              <td class="text-secondary small">{{ reg.id }}</td>
+              <td>{{ reg.player.ign }}<br><small class="text-secondary">{{ reg.player.user.email }}</small></td>
+              <td>{{ reg.tournament.title }}</td>
+              <td>
+                {% if reg.status == 'CONFIRMED' %}<span class="badge bg-success">Confirmed</span>
+                {% elif reg.status == 'PENDING' %}<span class="badge bg-warning text-dark">Pending</span>
+                {% elif reg.status == 'CANCELLED' %}<span class="badge bg-secondary">Cancelled</span>
+                {% else %}<span class="badge bg-danger">{{ reg.status }}</span>{% endif %}
+              </td>
+              <td class="text-secondary small">{{ reg.registered_at|date:"d M Y" }}</td>
+              <td>
+                {% if reg.status == 'PENDING' %}
+                <a href="{% url 'moderator:approve_registration' reg.id %}" class="btn btn-sm btn-arena-primary">✅ Confirm</a>
+                <a href="{% url 'moderator:reject_registration' reg.id %}" class="btn btn-sm btn-arena-ghost ms-1">❌ Cancel</a>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center text-secondary py-4">No registrations found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

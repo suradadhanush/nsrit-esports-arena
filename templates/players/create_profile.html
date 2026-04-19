@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Create Player Profile — NSRIT eSports Arena{% endblock %}
+{% block content %}
+<section class="page-header">
+    <div class="container"><h1 class="page-title">Setup Your <span class="text-red">Player Profile</span></h1><p class="text-secondary">Configure your gaming identity for the arena</p></div>
+</section>
+<section class="py-5"><div class="container"><div class="row justify-content-center"><div class="col-lg-6">
+    <div class="arena-form-card">
+        <h4 class="rajdhani text-center mb-1"><span class="text-red">🎮</span> Create Player Profile</h4>
+        <p class="text-secondary text-center small mb-4">Set up your IGN and game details</p>
+        <form method="post" novalidate>{% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-6"><label class="form-label">In-Game Name (IGN) <span class="required">*</span></label>{{ form.ign }}{% if form.ign.errors %}<div class="invalid-feedback d-block">{{ form.ign.errors|join:", " }}</div>{% endif %}</div>
+                <div class="col-md-6"><label class="form-label">Game ID / UID <span class="required">*</span></label>{{ form.game_id }}{% if form.game_id.errors %}<div class="invalid-feedback d-block">{{ form.game_id.errors|join:", " }}</div>{% endif %}</div>
+                <div class="col-md-6"><label class="form-label">Primary Game <span class="required">*</span></label>{{ form.primary_game }}</div>
+                <div class="col-md-6"><label class="form-label">Secondary Game</label>{{ form.secondary_game }}</div>
+                <div class="col-12"><label class="form-label">Bio</label>{{ form.bio }}</div>
+                <div class="col-md-6"><label class="form-label">Discord ID</label>{{ form.discord_id }}</div>
+                <div class="col-md-6"><label class="form-label">Instagram Handle</label>{{ form.instagram_handle }}</div>
+                <div class="col-12 d-flex align-items-center gap-2">{{ form.is_available }}<label class="form-check-label text-secondary">Available for team recruitment</label></div>
+                <div class="col-12 mt-2"><button type="submit" class="btn btn-arena-primary w-100 py-3"><i class="bi bi-controller me-2"></i>Create Profile & Enter Arena</button></div>
+            </div>
+        </form>
+    </div>
+</div></div></div></section>
+{% endblock %}

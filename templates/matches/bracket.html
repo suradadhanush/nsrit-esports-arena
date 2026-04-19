@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+
+{% block title %}Tournament Bracket — NSRIT eSports Arena{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container-xl">
+        <nav class="mb-2" style="font-size:0.8rem;">
+            <a href="{{ tournament.get_absolute_url }}" class="text-secondary text-decoration-none">
+                {{ tournament.title }}
+            </a>
+            <span class="text-secondary mx-2">/</span>
+            <span class="text-cyan">Bracket</span>
+        </nav>
+        <h1 class="page-title">
+            <i class="bi bi-diagram-3-fill text-cyan me-2"></i>
+            Tournament <span class="text-red">Bracket</span>
+        </h1>
+        <p class="text-secondary">{{ tournament.title }} — {{ tournament.game }}</p>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="container-xl">
+
+        {% if rounds %}
+        <!-- Bracket Visual -->
+        <div class="dashboard-hud">
+            <div class="hud-title"><i class="bi bi-diagram-3-fill"></i>Match Bracket</div>
+
+            <div class="bracket-container">
+                {% for round_name, matches in rounds %}
+                <div class="bracket-round">
+                    <div class="bracket-round-title">
+                        {% if round_name == 'ROUND_64' %}Round of 64
+                        {% elif round_name == 'ROUND_32' %}Round of 32
+                        {% elif round_name == 'ROUND_16' %}Round of 16
+                        {% elif round_name == 'QUARTER' %}Quarter Final
+                        {% elif round_name == 'SEMI' %}Semi Final
+                        {% elif round_name == 'THIRD_PLACE' %}3rd Place
+                        {% elif round_name == 'FINAL' %}🏆 Grand Final
+                        {% else %}{{ round_name }}{% endif %}
+                    </div>
+
+                    <div class="d-flex flex-column gap-3">
+                        {% for match in matches %}
+                        <div class="bracket-match {% if match.status == 'LIVE' %}live{% elif match.status == 'COMPLETED' %}completed{% endif %}">
+                            <!-- Participant 1 -->
+                            <div class="bracket-participant {% if match.winner_team and match.winner_team == match.team1 %}winner{% elif match.winner_player and match.winner_player == match.player1 %}winner{% endif %}">
+                                <span>
+                                    {% if tournament.mode in 'SQUAD,TEAM5' %}
+                                        {% if match.team1 %}
+                                            <i class="bi bi-shield-fill me-1 text-red" style="font-size:0.7rem;"></i>
+                                            {{ match.team1.name }}
+                                        {% else %}
+                                            <span class="text-secondary">TBD</span>
+                                        {% endif %}
+                                    {% else %}
+                                        {% if match.player1 %}
+                                            <i class="bi bi-person-fill me-1 text-red" style="font-size:0.7rem;"></i>
+                                            {{ match.player1.ign }}
+                                        {% else %}
+                                            <span class="text-secondary">BYE</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </span>
+                                {% if match.status == 'COMPLETED' %}
+                                <span class="bracket-score">{{ match.team1_score }}</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Participant 2 -->
+                            <div class="bracket-participant {% if match.winner_team and match.winner_team == match.team2 %}winner{% elif match.winner_player and match.winner_player == match.player2 %}winner{% endif %}">
+                                <span>
+                                    {% if tournament.mode in 'SQUAD,TEAM5' %}
+                                        {% if match.team2 %}
+                                            <i class="bi bi-shield-fill me-1 text-cyan" style="font-size:0.7rem;"></i>
+                                            {{ match.team2.name }}
+                                        {% else %}
+                                            <span class="text-secondary">TBD</span>
+                                        {% endif %}
+                                    {% else %}
+                                        {% if match.player2 %}
+                                            <i class="bi bi-person-fill me-1 text-cyan" style="font-size:0.7rem;"></i>
+                                            {{ match.player2.ign }}
+                                        {% else %}
+                                            <span class="text-secondary">BYE</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </span>
+                                {% if match.status == 'COMPLETED' %}
+                                <span class="bracket-score">{{ match.team2_score }}</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Match Info -->
+                            <div class="d-flex justify-content-between align-items-center px-2 py-1"
+                                 style="background:rgba(0,0,0,0.2);font-size:0.65rem;">
+                                <span class="text-secondary">
+                                    M{{ match.match_number }}
+                                    {% if match.scheduled_at %}
+                                    | {{ match.scheduled_at|date:"d M H:i" }}
+                                    {% endif %}
+                                </span>
+                                <span class="status-badge status-{{ match.status|lower }}"
+                                      style="font-size:0.6rem;padding:1px 6px;">
+                                    {{ match.status }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% else %}
+        <div class="empty-state text-center py-5">
+            <div class="empty-icon">🎯</div>
+            <h5 class="rajdhani">Bracket Not Generated Yet</h5>
+            <p class="text-secondary">The tournament bracket will be available once registration closes and matches are seeded.</p>
+            {% if user.is_staff %}
+            <a href="{% url 'matches:generate_bracket' slug=tournament.slug %}" class="btn btn-arena-primary mt-3">
+                <i class="bi bi-shuffle me-2"></i>Generate Bracket (Admin)
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Match Schedule Table -->
+        {% if all_matches %}
+        <div class="dashboard-hud mt-4">
+            <div class="hud-title"><i class="bi bi-calendar-event"></i>Match Schedule</div>
+            <div class="table-responsive">
+                <table class="table arena-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Match</th>
+                            <th>Round</th>
+                            <th>Player/Team 1</th>
+                            <th>VS</th>
+                            <th>Player/Team 2</th>
+                            <th>Score</th>
+                            <th>Status</th>
+                            {% if user.is_staff %}<th>Actions</th>{% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for match in all_matches %}
+                        <tr>
+                            <td class="text-secondary small">M{{ match.match_number }}</td>
+                            <td><span class="mini-tag">{{ match.get_round_name_display }}</span></td>
+                            <td class="rajdhani">
+                                {% if match.team1 %}{{ match.team1.name }}{% elif match.player1 %}{{ match.player1.ign }}{% else %}<span class="text-secondary">TBD</span>{% endif %}
+                            </td>
+                            <td class="text-red fw-bold text-center">VS</td>
+                            <td class="rajdhani">
+                                {% if match.team2 %}{{ match.team2.name }}{% elif match.player2 %}{{ match.player2.ign }}{% else %}<span class="text-secondary">TBD</span>{% endif %}
+                            </td>
+                            <td class="orbitron text-cyan">{{ match.team1_score }} : {{ match.team2_score }}</td>
+                            <td>
+                                <span class="status-badge status-{{ match.status|lower }}">{{ match.status }}</span>
+                            </td>
+                            {% if user.is_staff %}
+                            <td>
+                                <a href="{% url 'matches:update_result' match_id=match.id %}" class="btn btn-arena-xs">Update</a>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

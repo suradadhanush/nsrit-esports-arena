@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment — {{ tournament.title }}{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1 class="page-title"><i class="bi bi-credit-card-fill text-red me-2"></i>Secure <span class="text-cyan">Payment</span></h1>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5">
+                <div class="payment-card">
+                    <div class="payment-header">
+                        <div class="text-secondary small mb-1">Entry Fee for</div>
+                        <h5 class="rajdhani text-white mb-1">{{ tournament.title }}</h5>
+                        <div class="d-flex justify-content-center gap-2 mb-2">
+                            <span class="tag-game">{{ tournament.game }}</span>
+                            <span class="tag-mode">{{ tournament.get_mode_display }}</span>
+                        </div>
+                        <div class="payment-amount">₹{{ amount_inr }}</div>
+                        <div class="text-secondary small">Secured by Razorpay</div>
+                    </div>
+
+                    <div class="p-4">
+                        <!-- Player Info -->
+                        <div class="arena-form-card mb-3 p-3">
+                            <div class="hud-title mb-2"><i class="bi bi-person-fill"></i>Player Details</div>
+                            <div class="row g-2 text-secondary small">
+                                <div class="col-6">
+                                    <div>IGN</div>
+                                    <div class="text-white fw-bold">{{ player.ign }}</div>
+                                </div>
+                                <div class="col-6">
+                                    <div>Roll Number</div>
+                                    <div class="text-white fw-bold">{{ request.user.roll_number }}</div>
+                                </div>
+                                <div class="col-6">
+                                    <div>Name</div>
+                                    <div class="text-white fw-bold">{{ user_name }}</div>
+                                </div>
+                                <div class="col-6">
+                                    <div>Game</div>
+                                    <div class="text-white fw-bold">{{ tournament.game }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Razorpay Payment Button -->
+                        <form id="payment-form" method="POST" action="{% url 'payments:success' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
+                            <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+                            <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+                        </form>
+
+                        <button id="razorpay-btn" class="btn btn-arena-primary w-100 py-3" onclick="openRazorpay()">
+                            <i class="bi bi-lock-fill me-2"></i>
+                            Pay ₹{{ amount_inr }} Securely
+                        </button>
+
+                        <a href="{{ tournament.get_absolute_url }}" class="btn btn-arena-ghost w-100 mt-2">
+                            <i class="bi bi-arrow-left me-2"></i>Cancel
+                        </a>
+
+                        <p class="text-secondary text-center mt-3" style="font-size:0.75rem;">
+                            <i class="bi bi-shield-check me-1"></i>
+                            Your payment is 100% secure. Powered by Razorpay.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+function openRazorpay() {
+    var options = {
+        "key": "{{ razorpay_key }}",
+        "amount": "{{ amount }}",
+        "currency": "{{ currency }}",
+        "name": "NSRIT eSports Arena",
+        "description": "Tournament: {{ tournament.title }}",
+        "order_id": "{{ razorpay_order_id }}",
+        "prefill": {
+            "name": "{{ user_name }}",
+            "email": "{{ user_email }}",
+            "contact": "{{ user_phone }}"
+        },
+        "theme": {
+            "color": "#C41212"
+        },
+        "handler": function(response) {
+            document.getElementById('razorpay_order_id').value = response.razorpay_order_id;
+            document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+            document.getElementById('razorpay_signature').value = response.razorpay_signature;
+            document.getElementById('payment-form').submit();
+        },
+        "modal": {
+            "ondismiss": function() {
+                console.log("Payment cancelled by user.");
+            }
+        }
+    };
+    var rzp = new Razorpay(options);
+    rzp.open();
+}
+</script>
+{% endblock %}

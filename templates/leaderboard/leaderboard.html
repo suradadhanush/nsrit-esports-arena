@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}Leaderboard — NSRIT eSports Arena{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container-xl">
+        <h1 class="page-title"><i class="bi bi-bar-chart-fill text-red me-2"></i>Arena <span class="text-cyan">Leaderboard</span></h1>
+        <p class="text-secondary">Top warriors ranked by performance</p>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="container-xl">
+
+        <!-- Category Filter -->
+        <div class="d-flex flex-wrap gap-2 mb-4">
+            {% for val, label in categories %}
+            <a href="?category={{ val }}&season={{ season }}"
+               class="btn {% if category == val %}btn-arena-primary{% else %}btn-arena-ghost{% endif %} btn-sm">
+                {{ label }}
+            </a>
+            {% endfor %}
+        </div>
+
+        <!-- Top 3 Podium -->
+        {% if top3 %}
+        <div class="row justify-content-center g-3 mb-5">
+            <!-- 2nd Place -->
+            {% if top3|length >= 2 %}
+            <div class="col-md-3 col-6 order-md-1 order-2">
+                <div class="player-rank-card rank-silver text-center" style="margin-top:30px;">
+                    <div style="font-size:2rem;">🥈</div>
+                    <div class="rank-ign rajdhani mt-1">{{ top3.1.player.ign }}</div>
+                    <div class="text-secondary small">{{ top3.1.player.user.roll_number }}</div>
+                    <div class="text-silver fw-bold orbitron">{{ top3.1.rank_points }} pts</div>
+                    <div class="text-secondary small">W: {{ top3.1.total_wins }} | M: {{ top3.1.total_matches }}</div>
+                    <div class="player-tier-badge mt-2">{{ top3.1.player.tier }}</div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 1st Place -->
+            {% if top3 %}
+            <div class="col-md-3 col-12 order-md-2 order-1">
+                <div class="player-rank-card rank-gold text-center" style="border: 2px solid var(--gold);">
+                    <div style="font-size:2.5rem;">🥇</div>
+                    <div class="rank-ign rajdhani mt-1" style="font-size:1.2rem;">{{ top3.0.player.ign }}</div>
+                    <div class="text-secondary small">{{ top3.0.player.user.roll_number }}</div>
+                    <div class="text-gold fw-bold orbitron" style="font-size:1.3rem;">{{ top3.0.rank_points }} pts</div>
+                    <div class="text-secondary small">W: {{ top3.0.total_wins }} | M: {{ top3.0.total_matches }}</div>
+                    <div class="player-tier-badge mt-2" style="background:rgba(255,215,0,0.15);border-color:rgba(255,215,0,0.4);color:var(--gold);">
+                        {{ top3.0.player.tier }}
+                    </div>
+                    <div class="mt-2 text-gold" style="font-size:0.7rem;letter-spacing:0.1em;">CHAMPION</div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 3rd Place -->
+            {% if top3|length >= 3 %}
+            <div class="col-md-3 col-6 order-md-3 order-3">
+                <div class="player-rank-card rank-bronze text-center" style="margin-top:30px;">
+                    <div style="font-size:2rem;">🥉</div>
+                    <div class="rank-ign rajdhani mt-1">{{ top3.2.player.ign }}</div>
+                    <div class="text-secondary small">{{ top3.2.player.user.roll_number }}</div>
+                    <div class="text-bronze fw-bold orbitron">{{ top3.2.rank_points }} pts</div>
+                    <div class="text-secondary small">W: {{ top3.2.total_wins }} | M: {{ top3.2.total_matches }}</div>
+                    <div class="player-tier-badge mt-2">{{ top3.2.player.tier }}</div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Full Leaderboard Table -->
+        <div class="dashboard-hud">
+            <div class="hud-title"><i class="bi bi-list-ol"></i>Full Rankings — {{ category }}</div>
+
+            {% if entries %}
+            <div class="table-responsive">
+                <table class="leaderboard-table w-100">
+                    <thead>
+                        <tr>
+                            <th style="width:60px;">Rank</th>
+                            <th>Player</th>
+                            <th>Roll No.</th>
+                            <th>Branch</th>
+                            <th class="text-center">Matches</th>
+                            <th class="text-center">Wins</th>
+                            <th class="text-center">Win Rate</th>
+                            <th class="text-center">Kills</th>
+                            <th class="text-right">Points</th>
+                            <th>Tier</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in entries %}
+                        <tr class="leaderboard-row {% if entry.rank == 1 %}rank-1{% elif entry.rank == 2 %}rank-2{% elif entry.rank == 3 %}rank-3{% endif %}">
+                            <td>
+                                <span class="orbitron fw-bold" style="font-size:1.1rem;">
+                                    {% if entry.rank == 1 %}🥇
+                                    {% elif entry.rank == 2 %}🥈
+                                    {% elif entry.rank == 3 %}🥉
+                                    {% else %}<span class="text-secondary">#{{ entry.rank }}</span>{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="player-avatar" style="width:32px;height:32px;font-size:0.9rem;flex-shrink:0;">
+                                        🎮
+                                    </div>
+                                    <span class="rajdhani fw-bold">{{ entry.player.ign }}</span>
+                                </div>
+                            </td>
+                            <td class="text-secondary small">{{ entry.player.user.roll_number }}</td>
+                            <td><span class="mini-tag">{{ entry.player.user.branch }}</span></td>
+                            <td class="text-center">{{ entry.total_matches }}</td>
+                            <td class="text-center text-green fw-bold">{{ entry.total_wins }}</td>
+                            <td class="text-center text-cyan fw-bold">{{ entry.win_rate }}%</td>
+                            <td class="text-center text-red">{{ entry.total_kills }}</td>
+                            <td class="text-right">
+                                <span class="orbitron text-gold fw-bold">{{ entry.rank_points }}</span>
+                            </td>
+                            <td><span class="player-tier-badge">{{ entry.player.tier }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state text-center py-4">
+                <div class="empty-icon">🏆</div>
+                <p class="text-secondary">No rankings available yet. Compete in tournaments to earn rank points!</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Team Leaderboard -->
+        {% if team_entries %}
+        <div class="dashboard-hud mt-4">
+            <div class="hud-title"><i class="bi bi-shield-fill"></i>Team Rankings</div>
+            <div class="table-responsive">
+                <table class="leaderboard-table w-100">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Team</th>
+                            <th>Game</th>
+                            <th class="text-center">Matches</th>
+                            <th class="text-center">Wins</th>
+                            <th class="text-right">Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in team_entries %}
+                        <tr class="leaderboard-row {% if entry.rank == 1 %}rank-1{% elif entry.rank == 2 %}rank-2{% elif entry.rank == 3 %}rank-3{% endif %}">
+                            <td>
+                                {% if entry.rank == 1 %}🥇{% elif entry.rank == 2 %}🥈{% elif entry.rank == 3 %}🥉
+                                {% else %}<span class="text-secondary">#{{ entry.rank }}</span>{% endif %}
+                            </td>
+                            <td>
+                                <span class="rajdhani fw-bold">{{ entry.team.name }}</span>
+                                <span class="text-secondary ms-1 small">[{{ entry.team.tag }}]</span>
+                            </td>
+                            <td><span class="tag-game">{{ entry.team.game }}</span></td>
+                            <td class="text-center">{{ entry.total_matches }}</td>
+                            <td class="text-center text-green fw-bold">{{ entry.total_wins }}</td>
+                            <td class="text-right">
+                                <span class="orbitron text-gold fw-bold">{{ entry.rank_points }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+{% endblock %}

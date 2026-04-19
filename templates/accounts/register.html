@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Join NSRIT eSports Arena{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <div class="text-center">
+            <div class="section-badge mb-2">🎮 REGISTRATION</div>
+            <h1 class="page-title">Join the <span class="text-red">Arena</span></h1>
+            <p class="text-secondary">Create your NSRIT eSports account and start competing</p>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="arena-form-card fade-in-up">
+                    <h4 class="rajdhani text-center mb-1">
+                        <span class="text-red">⚔</span> Create Your Account
+                    </h4>
+                    <p class="text-secondary text-center small mb-4">Create your account and enter the arena</p>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <div class="row g-3">
+                            <!-- Name -->
+                            <div class="col-md-6">
+                                <label class="form-label">First Name <span class="required">*</span></label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                <div class="invalid-feedback d-block">{{ form.first_name.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Last Name <span class="required">*</span></label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                <div class="invalid-feedback d-block">{{ form.last_name.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-12">
+                                <label class="form-label">Email Address <span class="required">*</span></label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                <div class="invalid-feedback d-block">{{ form.email.errors|join:", " }}</div>
+                                {% endif %}
+                                <small class="text-secondary">Any valid email address</small>
+                            </div>
+
+                            <!-- Branch & Year -->
+                            <div class="col-md-6">
+                                <label class="form-label">Branch <span class="required">*</span></label>
+                                {{ form.branch }}
+                                {% if form.branch.errors %}
+                                <div class="invalid-feedback d-block">{{ form.branch.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Year <span class="required">*</span></label>
+                                {{ form.year }}
+                                {% if form.year.errors %}
+                                <div class="invalid-feedback d-block">{{ form.year.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Phone -->
+                            <div class="col-12">
+                                <label class="form-label">Phone Number</label>
+                                {{ form.phone }}
+                            </div>
+
+                            <!-- Password -->
+                            <div class="col-md-6">
+                                <label class="form-label">Password <span class="required">*</span></label>
+                                {{ form.password }}
+                                {% if form.password.errors %}
+                                <div class="invalid-feedback d-block">{{ form.password.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Confirm Password <span class="required">*</span></label>
+                                {{ form.confirm_password }}
+                                {% if form.confirm_password.errors %}
+                                <div class="invalid-feedback d-block">{{ form.confirm_password.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Non-field errors -->
+                            {% if form.non_field_errors %}
+                            <div class="col-12">
+                                <div class="arena-alert arena-alert-error p-3">
+                                    {{ form.non_field_errors|join:", " }}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Submit -->
+                            <div class="col-12 mt-2">
+                                <button type="submit" class="btn btn-arena-primary w-100 py-3">
+                                    <i class="bi bi-controller me-2"></i>
+                                    Create Arena Account
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <hr class="red-divider my-3">
+                    <p class="text-center text-secondary small">
+                        Already registered?
+                        <a href="{% url 'accounts:login' %}" class="text-red text-decoration-none fw-bold">Login here</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

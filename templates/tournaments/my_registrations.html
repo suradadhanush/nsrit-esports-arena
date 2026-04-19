@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}My Registrations — NSRIT eSports Arena{% endblock %}
+{% block content %}
+<section class="page-header"><div class="container-xl"><h1 class="page-title"><i class="bi bi-trophy-fill text-red me-2"></i>My <span class="text-cyan">Registrations</span></h1></div></section>
+<section class="py-4"><div class="container-xl">
+    <div class="dashboard-hud">
+        <div class="hud-title"><i class="bi bi-list-check"></i>All Tournament Registrations</div>
+        {% if registrations %}
+        <div class="table-responsive">
+            <table class="table arena-table mb-0">
+                <thead><tr><th>Tournament</th><th>Game</th><th>Mode</th><th>Entry Fee</th><th>Status</th><th>Registered</th><th></th></tr></thead>
+                <tbody>
+                    {% for reg in registrations %}
+                    <tr>
+                        <td><span class="rajdhani fw-bold">{{ reg.tournament.title }}</span></td>
+                        <td><span class="tag-game">{{ reg.tournament.game }}</span></td>
+                        <td><span class="mini-tag">{{ reg.tournament.get_mode_display }}</span></td>
+                        <td>{% if reg.tournament.entry_fee == 0 %}<span class="text-green fw-bold">FREE</span>{% else %}<span class="text-cyan fw-bold">₹{{ reg.tournament.entry_fee }}</span>{% endif %}</td>
+                        <td><span class="status-badge status-{{ reg.status|lower }}">{{ reg.get_status_display }}</span></td>
+                        <td class="text-secondary small">{{ reg.registered_at|date:"d M Y" }}</td>
+                        <td><a href="{{ reg.tournament.get_absolute_url }}" class="btn btn-arena-xs">View</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state text-center py-4"><div class="empty-icon">🏆</div><p class="text-secondary">No registrations yet.</p><a href="{% url 'tournaments:list' %}" class="btn btn-arena-sm mt-2">Browse Tournaments</a></div>
+        {% endif %}
+    </div>
+</div></section>
+{% endblock %}

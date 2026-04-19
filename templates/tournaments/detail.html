@@ -1,0 +1,234 @@
+{% load static %}
+
+{% extends 'base.html' %}
+
+{% block title %}{{ tournament.title }} — NSRIT eSports Arena{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container-xl">
+        <nav class="mb-2" style="font-size:0.8rem;">
+            <a href="{% url 'tournaments:list' %}" class="text-secondary text-decoration-none">
+                <i class="bi bi-trophy-fill me-1"></i>Tournaments
+            </a>
+            <span class="text-secondary mx-2">/</span>
+            <span class="text-red">{{ tournament.title }}</span>
+        </nav>
+
+        <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+            <div>
+                <div class="d-flex gap-2 mb-2">
+                    <span class="tag-game">{{ tournament.game }}</span>
+                    <span class="tag-mode">{{ tournament.get_mode_display }}</span>
+                    <span class="status-badge status-{{ tournament.status|lower }}">
+                        {{ tournament.get_status_display }}
+                    </span>
+                    {% if tournament.is_featured %}
+                    <span class="section-badge">⭐ Featured</span>
+                    {% endif %}
+                </div>
+                <h1 class="page-title">{{ tournament.title }}</h1>
+            </div>
+
+            <div class="text-end">
+                <div class="text-gold orbitron fw-bold" style="font-size:1.5rem;">
+                    ₹{{ tournament.prize_pool }}
+                </div>
+                <div class="text-secondary small">Total Prize Pool</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="py-4">
+    <div class="container-xl">
+        <div class="row g-4">
+
+            <!-- MAIN CONTENT -->
+            <div class="col-lg-8">
+
+                <!-- DETAILS -->
+                <div class="dashboard-hud mb-4">
+                    <div class="hud-title"><i class="bi bi-info-circle-fill"></i>Tournament Details</div>
+                    <p class="text-secondary mb-3">{{ tournament.description }}</p>
+
+                    <div class="row g-3">
+                        <div class="col-md-3 col-6">
+                            <div class="text-secondary small">Game</div>
+                            <div class="rajdhani fw-bold text-white">{{ tournament.game }}</div>
+                        </div>
+
+                        <div class="col-md-3 col-6">
+                            <div class="text-secondary small">Mode</div>
+                            <div class="rajdhani fw-bold text-white">{{ tournament.get_mode_display }}</div>
+                        </div>
+
+                        <div class="col-md-3 col-6">
+                            <div class="text-secondary small">Start Date</div>
+                            <div class="rajdhani fw-bold text-cyan">
+                                {{ tournament.start_date|date:"d M Y" }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 col-6">
+                            <div class="text-secondary small">Registration Deadline</div>
+                            <div class="rajdhani fw-bold text-red">
+                                {{ tournament.registration_deadline|date:"d M Y" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PRIZES -->
+                <div class="dashboard-hud mb-4">
+                    <div class="hud-title"><i class="bi bi-award-fill"></i>Prize Distribution</div>
+
+                    <div class="row g-3 text-center">
+                        <div class="col-4">
+                            <div style="font-size:2rem;">🥇</div>
+                            <div class="text-secondary small">1st</div>
+                            <div class="orbitron fw-bold text-gold">₹{{ tournament.first_prize }}</div>
+                        </div>
+
+                        <div class="col-4">
+                            <div style="font-size:2rem;">🥈</div>
+                            <div class="text-secondary small">2nd</div>
+                            <div class="orbitron fw-bold text-silver">₹{{ tournament.second_prize }}</div>
+                        </div>
+
+                        <div class="col-4">
+                            <div style="font-size:2rem;">🥉</div>
+                            <div class="text-secondary small">3rd</div>
+                            <div class="orbitron fw-bold text-bronze">₹{{ tournament.third_prize }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RULES -->
+                {% if tournament.rules %}
+                <div class="dashboard-hud mb-4">
+                    <div class="hud-title"><i class="bi bi-file-text-fill"></i>Tournament Rules</div>
+                    <div class="text-secondary" style="white-space:pre-line;">
+                        {{ tournament.rules }}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- REGISTERED PLAYERS -->
+                <div class="dashboard-hud">
+                    <div class="hud-title">
+                        <i class="bi bi-people-fill"></i>
+                        Registered Players ({{ tournament.registered_count }}/{{ tournament.max_players }})
+                    </div>
+
+                    {% if registered_players %}
+                    <div class="table-responsive">
+                        <table class="table arena-table mb-0">
+
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>IGN</th>
+                                    <th>Roll</th>
+                                    <th>Branch</th>
+                                    <th>Status</th>
+                                    {% if user.is_staff %}
+                                    <th>Actions</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for reg in registered_players %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ reg.player.ign }}</td>
+                                    <td>{{ reg.player.user.roll_number }}</td>
+                                    <td>{{ reg.player.user.branch }}</td>
+
+                                    <td>
+                                        <span class="status-badge status-{{ reg.status|lower }}">
+                                            {{ reg.get_status_display }}
+                                        </span>
+                                    </td>
+
+                                    {% if user.is_staff %}
+                                    <td>
+
+                                        {% if reg.status != 'CONFIRMED' %}
+                                        <form method="post" action="{% url 'tournaments:approve_registration' reg.id %}"
+                                            style="display:inline;">
+                                            {% csrf_token %}
+                                            <button class="btn btn-success btn-sm">
+                                                Approve
+                                            </button>
+                                        </form>
+                                        {% endif %}
+
+                                        {% if reg.status != 'CANCELLED' %}
+                                        <form method="post" action="{% url 'tournaments:reject_registration' reg.id %}"
+                                            style="display:inline;"
+                                            onsubmit="return confirm('Reject this registration?');">
+                                            {% csrf_token %}
+                                            <button class="btn btn-danger btn-sm">
+                                                Reject
+                                            </button>
+                                        </form>
+                                        {% endif %}
+
+                                    </td>
+                                    {% endif %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-secondary py-3">
+                        No registrations yet.
+                    </p>
+                    {% endif %}
+                </div>
+
+            </div>
+
+
+            <!-- SIDEBAR -->
+            <div class="col-lg-4">
+
+                <div class="arena-form-card sticky-top" style="top:80px;">
+
+                    {% if user.is_authenticated %}
+                    {% if user_registration %}
+                    <div class="alert alert-success text-center">
+                        Registered ✅
+                    </div>
+                    {% elif tournament.is_registration_open %}
+                    <form method="post" action="{% url 'tournaments:register' tournament.slug %}">
+                        {% csrf_token %}
+                        <button class="btn btn-arena-primary w-100">
+                            Register Now
+                        </button>
+                    </form>
+                    {% else %}
+                    <button class="btn btn-secondary w-100" disabled>
+                        Registration Closed
+                    </button>
+                    {% endif %}
+                    {% else %}
+                    <a href="{% url 'accounts:login' %}" class="btn btn-arena-primary w-100">
+                        Login to Register
+                    </a>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}

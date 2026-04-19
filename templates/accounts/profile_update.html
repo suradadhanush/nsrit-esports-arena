@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Update Account Profile — NSRIT eSports Arena{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1 class="page-title">Update <span class="text-red">Account</span></h1>
+        <p class="text-secondary">Change your name, phone number, or avatar</p>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5">
+                <div class="arena-form-card fade-in-up">
+                    <h4 class="rajdhani text-center mb-1">
+                        <span class="text-red">👤</span> Account Details
+                    </h4>
+                    <p class="text-secondary text-center small mb-4">{{ request.user.roll_number }} · {{ request.user.email }}</p>
+
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <label class="form-label">First Name <span class="required">*</span></label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}<div class="invalid-feedback d-block">{{ form.first_name.errors|join:", " }}</div>{% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Last Name <span class="required">*</span></label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}<div class="invalid-feedback d-block">{{ form.last_name.errors|join:", " }}</div>{% endif %}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Phone Number</label>
+                                {{ form.phone }}
+                                {% if form.phone.errors %}<div class="invalid-feedback d-block">{{ form.phone.errors|join:", " }}</div>{% endif %}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Avatar / Profile Picture</label>
+                                {% if request.user.avatar %}
+                                <div class="mb-2 d-flex align-items-center gap-2">
+                                    <img src="{{ request.user.avatar.url }}" alt="Current avatar" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--arena-red);">
+                                    <span class="text-secondary small">Current avatar</span>
+                                </div>
+                                {% endif %}
+                                {{ form.avatar }}
+                                {% if form.avatar.errors %}<div class="invalid-feedback d-block">{{ form.avatar.errors|join:", " }}</div>{% endif %}
+                                <small class="text-secondary">JPG or PNG, max 5 MB. Square images work best.</small>
+                            </div>
+
+                            <div class="col-12 d-flex gap-2 mt-2">
+                                <button type="submit" class="btn btn-arena-primary flex-grow-1 py-3">
+                                    <i class="bi bi-check-circle me-2"></i>Save Changes
+                                </button>
+                                <a href="{% url 'players:dashboard' %}" class="btn btn-arena-ghost py-3 px-4">
+                                    Cancel
+                                </a>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
