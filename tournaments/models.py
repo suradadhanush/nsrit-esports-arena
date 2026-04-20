@@ -80,6 +80,10 @@ class Tournament(models.Model):
     def __str__(self):
         return f"{self.title} ({self.game})"
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('tournaments:detail', kwargs={'slug': self.slug})
+
     @property
     def registered_count(self):
         return self.registrations.filter(status='CONFIRMED').count()
