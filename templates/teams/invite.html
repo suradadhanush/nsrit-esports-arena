@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Invite Player — {{ team.name }}{% endblock %}
+{% block content %}
+<section class="page-header">
+    <div class="container-xl">
+        <h1 class="page-title">📨 Invite <span class="text-red">Player</span></h1>
+    </div>
+</section>
+<section class="py-5">
+    <div class="container-xl">
+        <div class="row justify-content-center">
+            <div class="col-lg-5">
+                {% if messages %}
+                {% for message in messages %}
+                <div class="arena-alert p-3 mb-3">{{ message }}</div>
+                {% endfor %}
+                {% endif %}
+                <div class="arena-form-card">
+                    <h5 class="rajdhani mb-4">Invite to {{ team.name }}</h5>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Select Player <span class="text-red">*</span></label>
+                            {{ form.invited_player }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Role</label>
+                            {{ form.role }}
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Message</label>
+                            {{ form.message }}
+                        </div>
+                        <button type="submit" class="btn btn-arena-primary w-100">Send Invite</button>
+                        <a href="{% url 'teams:detail' team.slug %}" class="btn btn-arena-ghost w-100 mt-2">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

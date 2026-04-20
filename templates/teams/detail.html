@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}{{ team.name }} — NSRIT eSports Arena{% endblock %}
+{% block content %}
+<section class="page-header">
+    <div class="container-xl">
+        <h1 class="page-title">🏆 {{ team.tag }} <span class="text-red">{{ team.name }}</span></h1>
+        <div class="d-flex gap-2 mt-2 flex-wrap">
+            <span class="tag-game">{{ team.game }}</span>
+            {% if team.is_recruiting %}<span class="badge bg-success">Recruiting</span>{% endif %}
+        </div>
+    </div>
+</section>
+<section class="py-4">
+    <div class="container-xl">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="arena-alert p-3 mb-3">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="dashboard-hud mb-4">
+                    <div class="hud-title"><i class="bi bi-people-fill"></i> Team Members</div>
+                    <div class="table-responsive mt-3">
+                        <table class="table arena-table">
+                            <thead><tr><th>#</th><th>IGN</th><th>Name</th><th>Role</th><th>Joined</th></tr></thead>
+                            <tbody>
+                                {% for member in members %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ member.player.ign }}</td>
+                                    <td>{{ member.player.user.get_full_name }}</td>
+                                    <td>
+                                        {% if member.role == 'CAPTAIN' %}
+                                        <span class="badge bg-warning text-dark">👑 Captain</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">{{ member.role }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-secondary small">{{ member.joined_at|date:"d M Y" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="5" class="text-center text-secondary">No members yet.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% if team.description %}
+                <div class="dashboard-hud">
+                    <div class="hud-title"><i class="bi bi-info-circle-fill"></i> About</div>
+                    <p class="text-secondary mt-2">{{ team.description }}</p>
+                </div>
+                {% endif %}
+            </div>
+            <div class="col-lg-4">
+                <div class="arena-form-card">
+                    <div class="text-center mb-3">
+                        {% if team.logo %}
+                        <img src="{{ team.logo.url }}" alt="Team Logo" style="width:80px;height:80px;border-radius:50%;border:2px solid #C41212;">
+                        {% else %}
+                        <div style="width:80px;height:80px;border-radius:50%;background:#C41212;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto;">🎮</div>
+                        {% endif %}
+                        <h5 class="rajdhani mt-2">{{ team.name }}</h5>
+                        <div class="text-secondary small">[{{ team.tag }}] · {{ team.game }}</div>
+                    </div>
+                    <div class="d-flex justify-content-between text-secondary small mb-2">
+                        <span>Members</span><span class="text-white">{{ team.member_count }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between text-secondary small mb-2">
+                        <span>Win Rate</span><span class="text-cyan">{{ team.win_rate|floatformat:0 }}%</span>
+                    </div>
+                    <div class="d-flex justify-content-between text-secondary small mb-3">
+                        <span>Rank Points</span><span class="text-gold">{{ team.rank_points }}</span>
+                    </div>
+                    {% if user.is_authenticated %}
+                    {% if user.player_profile.team_membership.team == team %}
+                    {% if user.player_profile == team.captain %}
+                    <a href="{% url 'teams:invite' team.slug %}" class="btn btn-arena-primary w-100 mb-2">
+                        <i class="bi bi-person-plus me-1"></i>Invite Player
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'teams:leave' %}" class="btn btn-arena-ghost w-100"
+                       onclick="return confirm('Leave this team?')">Leave Team</a>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
