@@ -145,6 +145,7 @@ class Registration(models.Model):
 
     registered_at = models.DateTimeField(auto_now_add=True)
     confirmed_at = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True, default='')
 
     class Meta:
         db_table = 'registrations'
