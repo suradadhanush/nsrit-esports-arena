@@ -269,23 +269,31 @@ def upi_submit(request, slug):
         messages.warning(request, '⚠️ You already have a registration for this tournament.')
         return redirect('tournaments:detail', slug=slug)
 
+    # Handle payment screenshot upload
+    payment_screenshot = request.FILES.get('payment_screenshot')
+
     try:
-        Registration.objects.create(
+        reg = Registration.objects.create(
             player=player,
             tournament=tournament,
             status='PENDING',
             payment_method='UPI',
             payment_status='PENDING',
             transaction_id=transaction_id,
-	    notes='',
         )
+        # Save screenshot if provided
+        if payment_screenshot:
+            reg.payment_proof = payment_screenshot
+            reg.save(update_fields=['payment_proof'])
+
     except Exception as e:
         messages.error(request, f'Submission failed: {str(e)}')
         return redirect('payments:initiate', slug=slug)
 
+    screenshot_note = ' Screenshot uploaded ✅' if payment_screenshot else ' No screenshot uploaded — please share it with admin.'
     messages.success(
         request,
         f'✅ Payment details submitted! Registration for {tournament.title} is pending admin verification. '
-        f'Transaction ID: {transaction_id} ({upi_app}).'
+        f'Transaction ID: {transaction_id} ({upi_app}).{screenshot_note}'
     )
     return redirect('tournaments:detail', slug=slug)

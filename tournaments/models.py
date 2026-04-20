@@ -77,10 +77,6 @@ class Tournament(models.Model):
         db_table = 'tournaments'
         ordering = ['-created_at']
 
-    def get_absolute_url(self):
-        from django.urls import reverse
-        return reverse('tournaments:detail', kwargs={'slug': self.slug})
-    
     def __str__(self):
         return f"{self.title} ({self.game})"
 
@@ -142,10 +138,10 @@ class Registration(models.Model):
     transaction_id = models.CharField(max_length=100, blank=True, null=True)
 
     payment_proof = models.ImageField(upload_to='payment_proofs/', blank=True, null=True)
+    notes = models.TextField(blank=True, default='')
 
     registered_at = models.DateTimeField(auto_now_add=True)
     confirmed_at = models.DateTimeField(null=True, blank=True)
-    notes = models.TextField(blank=True, default='')
 
     class Meta:
         db_table = 'registrations'

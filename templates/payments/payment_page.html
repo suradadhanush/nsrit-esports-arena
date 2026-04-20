@@ -98,14 +98,37 @@
                         </div>
                     </div>
 
-                    <form method="post" action="{% url 'payments:upi_submit' tournament.slug %}">
+                    <form method="post" action="{% url 'payments:upi_submit' tournament.slug %}" enctype="multipart/form-data">
                         {% csrf_token %}
+
+                        <!-- QR Code Section -->
+                        <div class="text-center mb-4 p-3" style="background:rgba(255,255,255,0.05);border-radius:8px;border:1px solid rgba(0,245,255,0.2);">
+                            <div class="text-secondary small mb-2">Scan QR to Pay ₹{{ amount_inr }}</div>
+                            <!-- UPI QR via Google Charts API -->
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa={{ upi_id|default:'nsritesports@upi' }}&pn=NSRIT+eSports+Arena&am={{ amount_inr }}&cu=INR&tn=Tournament+{{ tournament.id }}"
+                                 alt="UPI QR Code"
+                                 style="border-radius:8px;border:3px solid #00F5FF;width:180px;height:180px;"
+                                 onerror="this.style.display='none';document.getElementById('qr-fallback').style.display='block'">
+                            <div id="qr-fallback" style="display:none;" class="text-secondary small p-2">
+                                QR not available — use UPI ID above
+                            </div>
+                            <div class="mt-2 text-secondary small">Open any UPI app → Scan → Pay ₹{{ amount_inr }}</div>
+                        </div>
+
                         <div class="mb-3">
                             <label class="form-label">Transaction ID / UTR Number <span class="text-red">*</span></label>
                             <input type="text" name="transaction_id" class="form-control cyber-input"
                                    placeholder="e.g. 407311982345" maxlength="50" required>
                             <div class="text-secondary small mt-1">12-digit number from your UPI app payment receipt</div>
                         </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Payment Screenshot <span class="text-secondary small">(Recommended)</span></label>
+                            <input type="file" name="payment_screenshot" class="form-control cyber-input"
+                                   accept="image/*" capture="environment">
+                            <div class="text-secondary small mt-1">Upload screenshot of your payment confirmation for faster verification</div>
+                        </div>
+
                         <div class="mb-3">
                             <label class="form-label">UPI App Used</label>
                             <select name="upi_app" class="form-select cyber-select">
@@ -116,6 +139,7 @@
                                 <option value="Other">Other</option>
                             </select>
                         </div>
+
                         <button type="submit" class="btn btn-arena-primary w-100 py-3">
                             <i class="bi bi-check-circle me-2"></i>Submit Payment Details
                         </button>
