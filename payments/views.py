@@ -277,6 +277,7 @@ def upi_submit(request, slug):
             payment_method='UPI',
             payment_status='PENDING',
             transaction_id=transaction_id,
+	    notes='',
         )
     except Exception as e:
         messages.error(request, f'Submission failed: {str(e)}')
