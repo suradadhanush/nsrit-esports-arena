@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.text import slugify
 from django.db.models import Q
-from .models import Team, TeamMember, TeamInvite
+from .models import Team, TeamMember, TeamInvite, TeamJoinRequest
 from players.models import Player
 from .forms import TeamCreateForm, TeamInviteForm
 
@@ -131,3 +131,77 @@ def leave_team(request):
     except TeamMember.DoesNotExist:
         messages.info(request, 'You are not in any team.')
     return redirect('players:dashboard')
+
+
+@login_required
+def request_join(request, slug):
+    """Player sends a join request to a team."""
+    team = get_object_or_404(Team, slug=slug, is_recruiting=True)
+
+    try:
+        player = request.user.player_profile
+    except Player.DoesNotExist:
+        messages.error(request, 'Create your player profile first!')
+        return redirect('players:create_profile')
+
+    if hasattr(player, 'team_membership'):
+        messages.warning(request, 'Leave your current team first before joining another.')
+        return redirect('teams:detail', slug=slug)
+
+    if TeamJoinRequest.objects.filter(team=team, player=player, status='PENDING').exists():
+        messages.warning(request, 'You already have a pending request for this team.')
+        return redirect('teams:detail', slug=slug)
+
+    if request.method == 'POST':
+        role = request.POST.get('role', 'MEMBER')
+        message = request.POST.get('message', '').strip()
+
+        TeamJoinRequest.objects.create(
+            team=team,
+            player=player,
+            role=role,
+            message=message,
+        )
+        messages.success(request, f'✅ Join request sent to [{team.tag}] {team.name}! Wait for captain approval.')
+        return redirect('teams:detail', slug=slug)
+
+    return render(request, 'teams/request_join.html', {
+        'team': team,
+        'role_choices': TeamMember.ROLE_CHOICES,
+    })
+
+
+@login_required
+def respond_join_request(request, request_id, action):
+    """Captain accepts or rejects a join request."""
+    join_request = get_object_or_404(TeamJoinRequest, id=request_id)
+
+    try:
+        player = request.user.player_profile
+    except Player.DoesNotExist:
+        return redirect('players:dashboard')
+
+    # Only captain can respond
+    if join_request.team.captain != player:
+        messages.error(request, 'Only the team captain can respond to join requests.')
+        return redirect('players:dashboard')
+
+    if action == 'accept':
+        if hasattr(join_request.player, 'team_membership'):
+            messages.warning(request, f'{join_request.player.ign} is already in a team.')
+        else:
+            TeamMember.objects.create(
+                team=join_request.team,
+                player=join_request.player,
+                role=join_request.role,
+            )
+            join_request.status = 'ACCEPTED'
+            join_request.save()
+            messages.success(request, f'✅ {join_request.player.ign} added to your team!')
+
+    elif action == 'reject':
+        join_request.status = 'REJECTED'
+        join_request.save()
+        messages.info(request, f'Join request from {join_request.player.ign} rejected.')
+
+    return redirect('teams:detail', slug=join_request.team.slug)

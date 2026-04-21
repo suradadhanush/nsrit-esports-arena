@@ -78,9 +78,16 @@
                             {% else %}
                             <span class="status-badge status-registration_closed">Closed</span>
                             {% endif %}
-                            <a href="{% url 'teams:detail' slug=team.slug %}" class="btn btn-arena-sm">
-                                View <i class="bi bi-arrow-right"></i>
-                            </a>
+                            <div class="d-flex gap-1">
+                                {% if team.is_recruiting and user.is_authenticated %}
+                                <a href="{% url 'teams:request_join' team.slug %}" class="btn btn-arena-xs">
+                                    Join
+                                </a>
+                                {% endif %}
+                                <a href="{% url 'teams:detail' slug=team.slug %}" class="btn btn-arena-sm">
+                                    View <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>

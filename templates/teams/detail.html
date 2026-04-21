@@ -46,6 +46,35 @@
                         </table>
                     </div>
                 </div>
+                {% if user.is_authenticated %}
+                {% if user.player_profile == team.captain %}
+                {% with pending_requests=team.join_requests.all %}
+                {% if pending_requests %}
+                <div class="dashboard-hud mb-4" style="border-left:3px solid #FFD700;">
+                    <div class="hud-title"><i class="bi bi-inbox-fill text-gold"></i> Join Requests
+                        <span class="badge bg-warning text-dark ms-1">{{ pending_requests|length }}</span>
+                    </div>
+                    {% for req in pending_requests %}
+                    {% if req.status == 'PENDING' %}
+                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2" style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                        <div>
+                            <div class="rajdhani fw-bold small text-white">{{ req.player.ign }}</div>
+                            <div class="text-secondary" style="font-size:0.7rem;">Role: {{ req.role }}</div>
+                            {% if req.message %}<div class="text-secondary" style="font-size:0.7rem;">{{ req.message }}</div>{% endif %}
+                        </div>
+                        <div class="d-flex gap-1">
+                            <a href="{% url 'teams:respond_join_request' req.id 'accept' %}" class="btn btn-arena-primary btn-sm" style="font-size:0.7rem;padding:3px 8px;">✅ Accept</a>
+                            <a href="{% url 'teams:respond_join_request' req.id 'reject' %}" class="btn btn-arena-ghost btn-sm" style="font-size:0.7rem;padding:3px 8px;">❌ Reject</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
+                {% endif %}
+                {% endif %}
+
                 {% if team.description %}
                 <div class="dashboard-hud">
                     <div class="hud-title"><i class="bi bi-info-circle-fill"></i> About</div>
@@ -75,14 +104,22 @@
                     </div>
                     {% if user.is_authenticated %}
                     {% if user.player_profile.team_membership.team == team %}
-                    {% if user.player_profile == team.captain %}
-                    <a href="{% url 'teams:invite' team.slug %}" class="btn btn-arena-primary w-100 mb-2">
-                        <i class="bi bi-person-plus me-1"></i>Invite Player
-                    </a>
+                        {% if user.player_profile == team.captain %}
+                        <a href="{% url 'teams:invite' team.slug %}" class="btn btn-arena-primary w-100 mb-2">
+                            <i class="bi bi-person-plus me-1"></i>Invite Player
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'teams:leave' %}" class="btn btn-arena-ghost w-100"
+                           onclick="return confirm('Leave this team?')">Leave Team</a>
+                    {% elif team.is_recruiting %}
+                        <a href="{% url 'teams:request_join' team.slug %}" class="btn btn-arena-primary w-100 mb-2">
+                            <i class="bi bi-send me-1"></i>Request to Join
+                        </a>
+                    {% else %}
+                        <button class="btn btn-secondary w-100" disabled>Not Recruiting</button>
                     {% endif %}
-                    <a href="{% url 'teams:leave' %}" class="btn btn-arena-ghost w-100"
-                       onclick="return confirm('Leave this team?')">Leave Team</a>
-                    {% endif %}
+                    {% else %}
+                    <a href="{% url 'accounts:login' %}" class="btn btn-arena-primary w-100">Login to Join</a>
                     {% endif %}
                 </div>
             </div>

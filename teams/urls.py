@@ -11,4 +11,6 @@ urlpatterns = [
     path('<slug:slug>/', views.team_detail, name='detail'),
     path('<slug:slug>/invite/', views.invite_player, name='invite'),
     path('invite/<int:invite_id>/<str:action>/', views.respond_invite, name='respond_invite'),
+    path('<slug:slug>/join/', views.request_join, name='request_join'),
+    path('join-request/<int:request_id>/<str:action>/', views.respond_join_request, name='respond_join_request'),
 ]

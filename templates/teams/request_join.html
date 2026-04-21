@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Request to Join {{ team.name }}{% endblock %}
+{% block content %}
+<section class="page-header">
+    <div class="container-xl">
+        <h1 class="page-title">📨 Request to Join <span class="text-red">{{ team.name }}</span></h1>
+    </div>
+</section>
+<section class="py-5">
+    <div class="container-xl">
+        <div class="row justify-content-center">
+            <div class="col-lg-5">
+                {% if messages %}
+                {% for message in messages %}
+                <div class="arena-alert p-3 mb-3">{{ message }}</div>
+                {% endfor %}
+                {% endif %}
+                <div class="arena-form-card">
+                    <div class="text-center mb-4">
+                        <div class="text-secondary small">Sending join request to</div>
+                        <h5 class="rajdhani text-cyan">[{{ team.tag }}] {{ team.name }}</h5>
+                        <span class="tag-game">{{ team.game }}</span>
+                    </div>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Preferred Role</label>
+                            <select name="role" class="form-select cyber-select">
+                                {% for value, label in role_choices %}
+                                {% if value != 'CAPTAIN' %}
+                                <option value="{{ value }}">{{ label }}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Message to Captain <span class="text-secondary small">(optional)</span></label>
+                            <textarea name="message" class="form-control cyber-input" rows="3"
+                                placeholder="Tell the captain why you want to join..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-arena-primary w-100 py-3">
+                            <i class="bi bi-send me-2"></i>Send Join Request
+                        </button>
+                        <a href="{% url 'teams:detail' team.slug %}" class="btn btn-arena-ghost w-100 mt-2">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

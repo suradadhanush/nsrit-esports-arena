@@ -113,3 +113,25 @@ class TeamInvite(models.Model):
 
     def __str__(self):
         return f"Invite: {self.invited_player.ign} → {self.team.name}"
+
+
+class TeamJoinRequest(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('ACCEPTED', 'Accepted'),
+        ('REJECTED', 'Rejected'),
+    ]
+
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='join_requests')
+    player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='join_requests')
+    role = models.CharField(max_length=15, choices=TeamMember.ROLE_CHOICES, default='MEMBER')
+    message = models.TextField(max_length=300, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'team_join_requests'
+        unique_together = [('team', 'player')]
+
+    def __str__(self):
+        return f"Request: {self.player.ign} → {self.team.name} [{self.status}]"
