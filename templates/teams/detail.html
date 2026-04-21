@@ -23,7 +23,9 @@
                     <div class="hud-title"><i class="bi bi-people-fill"></i> Team Members</div>
                     <div class="table-responsive mt-3">
                         <table class="table arena-table">
-                            <thead><tr><th>#</th><th>IGN</th><th>Name</th><th>Role</th><th>Joined</th></tr></thead>
+                            <thead><tr><th>#</th><th>IGN</th><th>Name</th><th>Role</th><th>Joined</th>
+                            {% if user.is_authenticated %}{% if user.player_profile == team.captain %}<th>Actions</th>{% endif %}{% endif %}
+                            </tr></thead>
                             <tbody>
                                 {% for member in members %}
                                 <tr>
@@ -38,9 +40,29 @@
                                         {% endif %}
                                     </td>
                                     <td class="text-secondary small">{{ member.joined_at|date:"d M Y" }}</td>
+                                    {% if user.is_authenticated %}
+                                    {% if user.player_profile == team.captain %}
+                                    <td>
+                                        {% if member.player != team.captain %}
+                                        <a href="{% url 'teams:transfer_captaincy' team.slug member.id %}"
+                                           class="btn btn-arena-ghost btn-sm me-1"
+                                           style="font-size:0.65rem;padding:2px 6px;"
+                                           onclick="return confirm('Transfer captaincy to {{ member.player.ign }}?')">
+                                           👑 Captain
+                                        </a>
+                                        <a href="{% url 'teams:kick_member' team.slug member.id %}"
+                                           class="btn btn-arena-ghost btn-sm"
+                                           style="font-size:0.65rem;padding:2px 6px;border-color:#C41212;color:#C41212;"
+                                           onclick="return confirm('Kick {{ member.player.ign }} from team?')">
+                                           🚫 Kick
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                    {% endif %}
+                                    {% endif %}
                                 </tr>
                                 {% empty %}
-                                <tr><td colspan="5" class="text-center text-secondary">No members yet.</td></tr>
+                                <tr><td colspan="6" class="text-center text-secondary">No members yet.</td></tr>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -105,12 +127,16 @@
                     {% if user.is_authenticated %}
                     {% if user.player_profile.team_membership.team == team %}
                         {% if user.player_profile == team.captain %}
+                        <a href="{% url 'teams:edit' team.slug %}" class="btn btn-arena-ghost w-100 mb-2">
+                            <i class="bi bi-pencil me-1"></i>Edit Team
+                        </a>
                         <a href="{% url 'teams:invite' team.slug %}" class="btn btn-arena-primary w-100 mb-2">
                             <i class="bi bi-person-plus me-1"></i>Invite Player
                         </a>
-                        {% endif %}
-                        <a href="{% url 'teams:leave' %}" class="btn btn-arena-ghost w-100"
+                        {% else %}
+                        <a href="{% url 'teams:leave' %}" class="btn btn-arena-ghost w-100 mb-2"
                            onclick="return confirm('Leave this team?')">Leave Team</a>
+                        {% endif %}
                     {% elif team.is_recruiting %}
                         <a href="{% url 'teams:request_join' team.slug %}" class="btn btn-arena-primary w-100 mb-2">
                             <i class="bi bi-send me-1"></i>Request to Join

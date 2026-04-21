@@ -229,6 +229,28 @@
                 </div>
                 {% endif %}
 
+                <!-- Captain: Pending Join Requests -->
+                {% if pending_join_requests %}
+                <div class="dashboard-hud mb-3" style="border-left:3px solid #FFD700;">
+                    <div class="hud-title"><i class="bi bi-inbox-fill text-gold"></i> Join Requests
+                        <span class="badge bg-warning text-dark ms-1">{{ pending_join_requests|length }}</span>
+                    </div>
+                    {% for req in pending_join_requests %}
+                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2" style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                        <div>
+                            <div class="rajdhani fw-bold small text-white">{{ req.player.ign }}</div>
+                            <div class="text-secondary" style="font-size:0.7rem;">Role: {{ req.role }} · {{ req.team.name }}</div>
+                            {% if req.message %}<div class="text-secondary" style="font-size:0.7rem;">"{{ req.message|truncatechars:50 }}"</div>{% endif %}
+                        </div>
+                        <div class="d-flex gap-1">
+                            <a href="{% url 'teams:respond_join_request' req.id 'accept' %}" class="btn btn-arena-primary btn-sm" style="font-size:0.7rem;padding:3px 8px;">✅</a>
+                            <a href="{% url 'teams:respond_join_request' req.id 'reject' %}" class="btn btn-arena-ghost btn-sm" style="font-size:0.7rem;padding:3px 8px;">❌</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
                 <!-- My Team -->
                 <div class="dashboard-hud mb-3">
                     <div class="hud-title"><i class="bi bi-people-fill"></i>My Team</div>

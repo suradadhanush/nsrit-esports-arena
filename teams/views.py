@@ -13,14 +13,17 @@ def team_list(request):
     teams = Team.objects.prefetch_related('members').all()
     game = request.GET.get('game', '')
     search = request.GET.get('search', '')
+    recruiting = request.GET.get('recruiting', '')
     if game:
         teams = teams.filter(game=game)
     if search:
         teams = teams.filter(Q(name__icontains=search) | Q(tag__icontains=search))
+    if recruiting == '1':
+        teams = teams.filter(is_recruiting=True)
     context = {
         'teams': teams,
         'game_choices': Team.GAME_CHOICES,
-        'filters': {'game': game, 'search': search},
+        'filters': {'game': game, 'search': search, 'recruiting': recruiting},
     }
     return render(request, 'teams/list.html', context)
 
@@ -205,3 +208,87 @@ def respond_join_request(request, request_id, action):
         messages.info(request, f'Join request from {join_request.player.ign} rejected.')
 
     return redirect('teams:detail', slug=join_request.team.slug)
+
+
+@login_required
+def edit_team(request, slug):
+    """Captain edits team details."""
+    team = get_object_or_404(Team, slug=slug)
+    try:
+        player = request.user.player_profile
+    except Player.DoesNotExist:
+        return redirect('players:create_profile')
+
+    if team.captain != player:
+        messages.error(request, 'Only the team captain can edit team details.')
+        return redirect('teams:detail', slug=slug)
+
+    if request.method == 'POST':
+        form = TeamCreateForm(request.POST, request.FILES, instance=team)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '✅ Team details updated!')
+            return redirect('teams:detail', slug=team.slug)
+    else:
+        form = TeamCreateForm(instance=team)
+
+    return render(request, 'teams/edit_team.html', {'form': form, 'team': team})
+
+
+@login_required
+def kick_member(request, slug, member_id):
+    """Captain kicks a member from the team."""
+    team = get_object_or_404(Team, slug=slug)
+    try:
+        player = request.user.player_profile
+    except Player.DoesNotExist:
+        return redirect('players:create_profile')
+
+    if team.captain != player:
+        messages.error(request, 'Only the team captain can remove members.')
+        return redirect('teams:detail', slug=slug)
+
+    member = get_object_or_404(TeamMember, id=member_id, team=team)
+
+    if member.player == player:
+        messages.error(request, 'You cannot kick yourself. Transfer captaincy first.')
+        return redirect('teams:detail', slug=slug)
+
+    ign = member.player.ign
+    member.delete()
+    messages.success(request, f'🚫 {ign} has been removed from the team.')
+    return redirect('teams:detail', slug=slug)
+
+
+@login_required
+def transfer_captaincy(request, slug, member_id):
+    """Captain transfers captaincy to another member."""
+    team = get_object_or_404(Team, slug=slug)
+    try:
+        player = request.user.player_profile
+    except Player.DoesNotExist:
+        return redirect('players:create_profile')
+
+    if team.captain != player:
+        messages.error(request, 'Only the current captain can transfer captaincy.')
+        return redirect('teams:detail', slug=slug)
+
+    new_captain_member = get_object_or_404(TeamMember, id=member_id, team=team)
+    new_captain = new_captain_member.player
+
+    if new_captain == player:
+        messages.error(request, 'You are already the captain.')
+        return redirect('teams:detail', slug=slug)
+
+    from django.db import transaction
+    with transaction.atomic():
+        # Update team captain
+        team.captain = new_captain
+        team.save(update_fields=['captain'])
+
+        # Update roles in TeamMember
+        TeamMember.objects.filter(team=team, player=player).update(role='MEMBER')
+        TeamMember.objects.filter(team=team, player=new_captain).update(role='CAPTAIN')
+
+    messages.success(request, f'👑 Captaincy transferred to {new_captain.ign}!')
+    return redirect('teams:detail', slug=slug)

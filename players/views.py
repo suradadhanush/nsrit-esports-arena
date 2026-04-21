@@ -62,12 +62,18 @@ def dashboard(request):
         player=player
     ).order_by('-created_at')[:3]
 
-    # Pending team invites
-    from teams.models import TeamInvite
+    # Pending team invites (for this player)
+    from teams.models import TeamInvite, TeamJoinRequest
     pending_invites = TeamInvite.objects.filter(
         invited_player=player,
         status='PENDING'
     ).select_related('team').order_by('-created_at')
+
+    # Pending join requests (for captain)
+    pending_join_requests = TeamJoinRequest.objects.filter(
+        team__captain=player,
+        status='PENDING'
+    ).select_related('team', 'player__user').order_by('-created_at')
 
     # Stats for HUD
     context = {
@@ -78,6 +84,7 @@ def dashboard(request):
         'recent_payments': recent_payments,
         'total_registrations': Registration.objects.filter(player=player).count(),
         'pending_invites': pending_invites,
+        'pending_join_requests': pending_join_requests,
     }
     return render(request, 'players/dashboard.html', context)
 

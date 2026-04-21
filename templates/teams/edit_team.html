@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Edit Team — {{ team.name }}{% endblock %}
+{% block content %}
+<section class="page-header">
+    <div class="container-xl">
+        <h1 class="page-title">✏️ Edit <span class="text-red">{{ team.name }}</span></h1>
+    </div>
+</section>
+<section class="py-5">
+    <div class="container-xl">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                {% if messages %}{% for m in messages %}<div class="arena-alert p-3 mb-3">{{ m }}</div>{% endfor %}{% endif %}
+                <div class="arena-form-card">
+                    <h5 class="rajdhani mb-4">Update Team Details</h5>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Team Name</label>
+                            {{ form.name }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Team Tag</label>
+                            {{ form.tag }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Primary Game</label>
+                            {{ form.game }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            {{ form.description }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Team Logo</label>
+                            {{ form.logo }}
+                            {% if team.logo %}
+                            <div class="mt-2">
+                                <img src="{{ team.logo.url }}" style="width:50px;height:50px;border-radius:50%;border:2px solid #C41212;">
+                                <span class="text-secondary small ms-2">Current logo</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-4 d-flex align-items-center gap-2">
+                            {{ form.is_recruiting }}
+                            <label class="form-label mb-0">Open for recruitment</label>
+                        </div>
+                        <button type="submit" class="btn btn-arena-primary w-100 py-3">
+                            <i class="bi bi-check-circle me-2"></i>Save Changes
+                        </button>
+                        <a href="{% url 'teams:detail' team.slug %}" class="btn btn-arena-ghost w-100 mt-2">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
