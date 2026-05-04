@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Schedule — {{ tournament.title }}{% endblock %}
+{% block content %}
+<section class="page-header">
+    <div class="container-xl">
+        <nav class="mb-2" style="font-size:0.8rem;">
+            <a href="{{ tournament.get_absolute_url }}" class="text-secondary text-decoration-none">{{ tournament.title }}</a>
+            <span class="text-secondary mx-2">/</span>
+            <span class="text-cyan">Schedule</span>
+        </nav>
+        <h1 class="page-title"><i class="bi bi-calendar3 text-cyan me-2"></i>Match <span class="text-red">Schedule</span></h1>
+    </div>
+</section>
+<section class="py-4">
+    <div class="container-xl">
+        <div class="d-flex gap-2 mb-4 flex-wrap">
+            <a href="{% url 'matches:bracket' tournament.slug %}" class="btn btn-arena-ghost btn-sm">🏆 Bracket</a>
+            <a href="{% url 'matches:tournament_leaderboard' tournament.slug %}" class="btn btn-arena-ghost btn-sm">📊 Standings</a>
+            <a href="{% url 'matches:results' tournament.slug %}" class="btn btn-arena-ghost btn-sm">🥇 Results</a>
+            {% if user.is_staff %}
+            <a href="{% url 'matches:admin_update_match' tournament.slug %}" class="btn btn-arena-primary btn-sm ms-auto">⚙ Update Result</a>
+            <a href="{% url 'matches:admin_slots' tournament.slug %}" class="btn btn-arena-ghost btn-sm">🕐 Manage Slots</a>
+            {% endif %}
+        </div>
+
+        <div class="dashboard-hud">
+            <div class="hud-title"><i class="bi bi-calendar3"></i> All Matches</div>
+            <div class="table-responsive mt-3">
+                <table class="table arena-table">
+                    <thead>
+                        <tr><th>Round</th><th>Match</th><th>Team 1</th><th>vs</th><th>Team 2</th><th>Score</th><th>Winner</th><th>Time</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for match in matches %}
+                        <tr>
+                            <td class="text-secondary small">{{ match.get_round_name_display }}</td>
+                            <td class="text-secondary small">M{{ match.match_number }}</td>
+                            <td class="fw-bold {% if match.winner_team == match.team1 or match.winner_player == match.player1 %}text-cyan{% endif %}">
+                                {{ match.team1.name|default:match.player1.ign|default:"TBD" }}
+                            </td>
+                            <td class="text-secondary text-center">⚔</td>
+                            <td class="fw-bold {% if match.winner_team == match.team2 or match.winner_player == match.player2 %}text-cyan{% endif %}">
+                                {{ match.team2.name|default:match.player2.ign|default:"TBD" }}
+                            </td>
+                            <td class="text-white">{{ match.team1_score }} : {{ match.team2_score }}</td>
+                            <td>
+                                {% if match.winner_team %}
+                                <span class="text-green fw-bold">🏆 {{ match.winner_team.name }}</span>
+                                {% elif match.winner_player %}
+                                <span class="text-green fw-bold">🏆 {{ match.winner_player.ign }}</span>
+                                {% else %}—{% endif %}
+                            </td>
+                            <td class="text-secondary small">
+                                {% if match.scheduled_at %}{{ match.scheduled_at|date:"d M H:i" }}{% else %}—{% endif %}
+                            </td>
+                            <td>
+                                {% if match.status == 'LIVE' %}<span class="badge bg-success">🔴 LIVE</span>
+                                {% elif match.status == 'COMPLETED' %}<span class="badge bg-primary">✅ Done</span>
+                                {% elif match.status == 'SCHEDULED' %}<span class="badge bg-secondary">📅 Scheduled</span>
+                                {% else %}<span class="badge bg-warning text-dark">{{ match.status }}</span>{% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="9" class="text-center text-secondary py-4">No matches yet. Bracket not generated.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

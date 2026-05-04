@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Assign Slots — Admin{% endblock %}
+{% block content %}
+<section class="page-header">
+    <div class="container-xl">
+        <h1 class="page-title">🔗 Assign <span class="text-red">Slots to Matches</span></h1>
+        <p class="text-secondary">{{ tournament.title }}</p>
+    </div>
+</section>
+<section class="py-4">
+    <div class="container-xl">
+        <a href="{% url 'matches:admin_slots' tournament.slug %}" class="btn btn-arena-ghost btn-sm mb-4">← Back to Slots</a>
+        {% if messages %}{% for m in messages %}<div class="arena-alert p-3 mb-3">{{ m }}</div>{% endfor %}{% endif %}
+
+        <div class="arena-form-card">
+            <h5 class="rajdhani mb-4">Assign Time Slot to Unscheduled Match</h5>
+            {% if unscheduled_matches and available_slots %}
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Select Match <span class="text-red">*</span></label>
+                    <select name="match_id" class="form-select cyber-select" required>
+                        <option value="">— Choose Match —</option>
+                        {% for match in unscheduled_matches %}
+                        <option value="{{ match.id }}">
+                            {{ match.get_round_name_display }} M{{ match.match_number }} —
+                            {{ match.team1.name|default:match.player1.ign|default:"TBD" }} vs
+                            {{ match.team2.name|default:match.player2.ign|default:"TBD" }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Select Time Slot <span class="text-red">*</span></label>
+                    <select name="slot_id" class="form-select cyber-select" required>
+                        <option value="">— Choose Slot —</option>
+                        {% for slot in available_slots %}
+                        <option value="{{ slot.id }}">{{ slot.label }} — {{ slot.start_time|date:"d M H:i" }} to {{ slot.end_time|date:"H:i" }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-arena-primary w-100">Assign Slot</button>
+            </form>
+            {% else %}
+            <div class="text-center text-secondary py-4">
+                {% if not unscheduled_matches %}✅ All matches have been scheduled.
+                {% elif not available_slots %}⚠️ No available slots. Create more slots first.{% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

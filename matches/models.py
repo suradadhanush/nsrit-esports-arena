@@ -142,3 +142,46 @@ class TournamentResult(models.Model):
     def __str__(self):
         name = self.team.name if self.team else self.player.ign
         return f"#{self.position} {name} — {self.tournament.title}"
+
+
+class TimeSlot(models.Model):
+    """Time slot for scheduling matches."""
+    tournament = models.ForeignKey(
+        Tournament,
+        on_delete=models.CASCADE,
+        related_name='time_slots'
+    )
+    label = models.CharField(max_length=100, blank=True, help_text='e.g. Match 1 - Round of 16')
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    is_booked = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'time_slots'
+        ordering = ['start_time']
+
+    def __str__(self):
+        return f"{self.tournament.title} | {self.start_time.strftime('%d %b %H:%M')} — {self.end_time.strftime('%H:%M')}"
+
+
+class TeamStats(models.Model):
+    """Per-tournament stats for a team."""
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='team_stats')
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='tournament_stats')
+    matches_played = models.IntegerField(default=0)
+    wins = models.IntegerField(default=0)
+    losses = models.IntegerField(default=0)
+    points = models.IntegerField(default=0)
+
+    class Meta:
+        db_table = 'team_stats'
+        unique_together = [('tournament', 'team')]
+
+    def __str__(self):
+        return f"{self.team.name} — {self.tournament.title}"
+
+    @property
+    def win_rate(self):
+        if self.matches_played > 0:
+            return round((self.wins / self.matches_played) * 100, 1)
+        return 0.0

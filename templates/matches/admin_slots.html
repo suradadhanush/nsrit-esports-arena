@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}Manage Time Slots — Admin{% endblock %}
+{% block content %}
+<section class="page-header">
+    <div class="container-xl">
+        <h1 class="page-title">🕐 Manage <span class="text-red">Time Slots</span></h1>
+        <p class="text-secondary">{{ tournament.title }}</p>
+    </div>
+</section>
+<section class="py-4">
+    <div class="container-xl">
+        <div class="d-flex gap-2 mb-4 flex-wrap">
+            <a href="{% url 'matches:bracket' tournament.slug %}" class="btn btn-arena-ghost btn-sm">← Bracket</a>
+            <a href="{% url 'matches:admin_update_match' tournament.slug %}" class="btn btn-arena-ghost btn-sm">⚙ Update Results</a>
+            <a href="{% url 'matches:admin_assign_slot' tournament.slug %}" class="btn btn-arena-primary btn-sm ms-auto">🔗 Assign Slots to Matches</a>
+        </div>
+        {% if messages %}{% for m in messages %}<div class="arena-alert p-3 mb-3">{{ m }}</div>{% endfor %}{% endif %}
+
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="arena-form-card">
+                    <h5 class="rajdhani mb-4">Bulk Create Time Slots</h5>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Start Time <span class="text-red">*</span></label>
+                            <input type="datetime-local" name="start_time" class="form-control cyber-input" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Interval (minutes)</label>
+                            <input type="number" name="interval_minutes" value="30" class="form-control cyber-input" min="5">
+                            <div class="text-secondary small mt-1">Gap between each slot</div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Number of Slots</label>
+                            <input type="number" name="count" value="4" class="form-control cyber-input" min="1" max="50">
+                        </div>
+                        <button type="submit" class="btn btn-arena-primary w-100">Create Slots</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="dashboard-hud">
+                    <div class="hud-title"><i class="bi bi-clock-fill"></i> Existing Slots ({{ slots|length }})</div>
+                    <div class="table-responsive mt-3">
+                        <table class="table arena-table">
+                            <thead><tr><th>Label</th><th>Start</th><th>End</th><th>Status</th></tr></thead>
+                            <tbody>
+                                {% for slot in slots %}
+                                <tr>
+                                    <td class="text-white small">{{ slot.label|default:"—" }}</td>
+                                    <td class="text-secondary small">{{ slot.start_time|date:"d M H:i" }}</td>
+                                    <td class="text-secondary small">{{ slot.end_time|date:"H:i" }}</td>
+                                    <td>
+                                        {% if slot.is_booked %}
+                                        <span class="badge bg-danger">Booked</span>
+                                        {% else %}
+                                        <span class="badge bg-success">Available</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center text-secondary py-3">No slots created yet.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}Results — {{ tournament.title }}{% endblock %}
+{% block content %}
+<section class="page-header">
+    <div class="container-xl">
+        <nav class="mb-2" style="font-size:0.8rem;">
+            <a href="{{ tournament.get_absolute_url }}" class="text-secondary text-decoration-none">{{ tournament.title }}</a>
+            <span class="text-secondary mx-2">/</span>
+            <span class="text-cyan">Results</span>
+        </nav>
+        <h1 class="page-title">🏆 <span class="text-red">Final Results</span></h1>
+    </div>
+</section>
+<section class="py-4">
+    <div class="container-xl">
+        <div class="d-flex gap-2 mb-4">
+            <a href="{% url 'matches:bracket' tournament.slug %}" class="btn btn-arena-ghost btn-sm">🏆 Bracket</a>
+            <a href="{% url 'matches:schedule' tournament.slug %}" class="btn btn-arena-ghost btn-sm">📅 Schedule</a>
+            <a href="{% url 'matches:tournament_leaderboard' tournament.slug %}" class="btn btn-arena-ghost btn-sm">📊 Standings</a>
+        </div>
+
+        {% if results %}
+        <!-- Top 3 Podium -->
+        <div class="row g-3 mb-4 justify-content-center">
+            {% for result in results|slice:":3" %}
+            <div class="col-md-4">
+                <div class="dashboard-hud text-center" style="{% if result.position == 1 %}border:1px solid #FFD700;{% elif result.position == 2 %}border:1px solid #C0C0C0;{% else %}border:1px solid #CD7F32;{% endif %}">
+                    <div style="font-size:2.5rem;">{% if result.position == 1 %}🥇{% elif result.position == 2 %}🥈{% else %}🥉{% endif %}</div>
+                    <div class="rajdhani fw-bold text-white" style="font-size:1.2rem;">
+                        {{ result.team.name|default:result.player.ign }}
+                    </div>
+                    <div class="text-secondary small">Position #{{ result.position }}</div>
+                    {% if result.prize_won > 0 %}
+                    <div class="text-gold fw-bold mt-1">₹{{ result.prize_won }}</div>
+                    {% endif %}
+                    {% if result.kills > 0 %}
+                    <div class="text-secondary small">{{ result.kills }} kills</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Full Table -->
+        <div class="dashboard-hud">
+            <div class="hud-title"><i class="bi bi-list-ol"></i> Full Rankings</div>
+            <div class="table-responsive mt-3">
+                <table class="table arena-table">
+                    <thead><tr><th>Position</th><th>Team / Player</th><th>Kills</th><th>Points</th><th>Prize</th></tr></thead>
+                    <tbody>
+                        {% for result in results %}
+                        <tr>
+                            <td>
+                                {% if result.position == 1 %}🥇 1st
+                                {% elif result.position == 2 %}🥈 2nd
+                                {% elif result.position == 3 %}🥉 3rd
+                                {% else %}#{{ result.position }}{% endif %}
+                            </td>
+                            <td class="fw-bold text-white">{{ result.team.name|default:result.player.ign }}</td>
+                            <td>{{ result.kills }}</td>
+                            <td class="text-cyan">{{ result.points }}</td>
+                            <td class="text-gold">{% if result.prize_won > 0 %}₹{{ result.prize_won }}{% else %}—{% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="dashboard-hud text-center py-5">
+            <div style="font-size:3rem;">🏆</div>
+            <div class="rajdhani text-white mt-2" style="font-size:1.3rem;">Results not published yet</div>
+            <div class="text-secondary small mt-1">Check back after the tournament ends</div>
+            <a href="{% url 'matches:schedule' tournament.slug %}" class="btn btn-arena-primary mt-3">View Schedule</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
