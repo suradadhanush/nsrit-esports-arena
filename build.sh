@@ -12,24 +12,7 @@ python manage.py migrate
 
 # ── One-time: unlock all existing unverified accounts
 python manage.py shell -c "
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
-
-email = '25nu1a4436@nsrit.edu.in'
-password = 'Admin@1234'
-
-user, created = User.objects.get_or_create(email=email)
-
-user.is_staff = True
-user.is_superuser = True
-
-user.set_password(password)
-
-if hasattr(user, 'email_verified'):
-    user.email_verified = True
-
-user.save()
-
-print('Admin created/updated successfully')
+from accounts.models import NSRITUser
+updated = NSRITUser.objects.filter(email_verified=False).update(email_verified=True)
+print(f'Unlocked {updated} unverified accounts')
 "
