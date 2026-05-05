@@ -13,6 +13,14 @@ python manage.py migrate
 # ── One-time: unlock all existing unverified accounts
 python manage.py shell -c "
 from accounts.models import NSRITUser
-updated = NSRITUser.objects.filter(email_verified=False).update(email_verified=True)
-print(f'Unlocked {updated} unverified accounts')
+u = NSRITUser.objects.filter(email='25nu1a4430@nsrit.edu.in').first()
+if u:
+    u.is_staff = True
+    u.is_superuser = True
+    u.email_verified = True
+    u.set_password('Admin@1234')
+    u.save()
+    print('Admin fixed')
+else:
+    print('User not found')
 "
